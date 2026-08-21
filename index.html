@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MindCal — ADHD-Friendly Calendar</title>
+
+<style>
+:root {
+    --baby-blue: #bfe7f5;
+    --baby-blue-light: #eaf8fc;
+    --navy: #102a43;
+    --navy-light: #243b53;
+    --white: #ffffff;
+    --gray: #627d98;
+    --light-gray: #f4f8fb;
+    --border: #d9e8ef;
+    --green: #4caf7a;
+    --red: #d9534f;
+    --yellow: #f0b429;
+    --shadow: 0 8px 25px rgba(16,42,67,.10);
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: var(--baby-blue-light);
+    color: var(--navy);
+}
+
+button,
+input,
+textarea,
+select {
+    font: inherit;
+}
+
+button {
+    cursor: pointer;
+}
+
+header {
+    background: var(--navy);
+    color: white;
+    padding: 18px 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.subtitle {
+    font-size: 12px;
+    opacity: .75;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.header-buttons button {
+    border: none;
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: var(--baby-blue);
+    color: var(--navy);
+    font-weight: bold;
+}
+
+.container {
+    width: 94%;
+    max-width: 1300px;
+    margin: 25px auto;
+}
+
+.top-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.calendar-header h2 {
+    margin: 0;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 6px;
+}
+
+.nav-buttons button {
+    border: none;
+    background: var(--baby-blue);
+    color: var(--navy);
+    border-radius: 9px;
+    padding: 9px 12px;
+    font-weight: bold;
+}
+
+.weekdays,
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+
+.weekday {
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--gray);
+    padding: 8px 0;
+}
+
+.day {
+    min-height: 105px;
+    border: 1px solid var(--border);
+    padding: 7px;
+    position: relative;
+    background: white;
+    cursor: pointer;
+    transition: .15s;
+}
+
+.day:hover {
+    background: var(--baby-blue-light);
+}
+
+.day.other-month {
+    opacity: .4;
+}
+
+.day.today {
+    background: #eef9fd;
+}
+
+.day.selected {
+    outline: 3px solid var(--baby-blue);
+    z-index: 2;
+}
+
+.day-number {
+    font-weight: bold;
+    font-size: 13px;
+    margin-bottom: 5px;
+}
+
+.event-dot {
+    display: block;
+    font-size: 11px;
+    margin: 3px 0;
+    padding: 4px 6px;
+    border-radius: 6px;
+    background: var(--baby-blue);
+    color: var(--navy);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.event-dot.completed {
+    text-decoration: line-through;
+    opacity: .55;
+}
+
+.event-dot.cancelled {
+    text-decoration: line-through;
+    opacity: .35;
+}
+
+.selected-title {
+    margin-top: 0;
+}
+
+.event-item {
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: var(--light-gray);
+}
+
+.event-item h4 {
+    margin: 0 0 5px;
+}
+
+.event-meta {
+    font-size: 12px;
+    color: var(--gray);
+    margin-bottom: 8px;
+}
+
+.event-actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.small-btn {
+    border: none;
+    border-radius: 7px;
+    padding: 6px 9px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.complete-btn {
+    background: #dff5e8;
+    color: #217346;
+}
+
+.move-btn {
+    background: var(--baby-blue);
+    color: var(--navy);
+}
+
+.cancel-btn {
+    background: #fff0ef;
+    color: var(--red);
+}
+
+.delete-btn {
+    background: #eee;
+    color: #555;
+}
+
+.add-btn {
+    width: 100%;
+    border: none;
+    border-radius: 12px;
+    background: var(--navy);
+    color: white;
+    padding: 14px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.brain-dump textarea {
+    width: 100%;
+    min-height: 130px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    resize: vertical;
+}
+
+.save-dump {
+    margin-top: 8px;
+    border: none;
+    background: var(--baby-blue);
+    color: var(--navy);
+    padding: 9px 13px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: var(--light-gray);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 22px;
+}
+
+.stat span {
+    font-size: 11px;
+    color: var(--gray);
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(16,42,67,.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    z-index: 100;
+}
+
+.modal.active {
+    display: flex;
+}
+
+.modal-box {
+    background: white;
+    width: 100%;
+    max-width: 600px;
+    max-height: 92vh;
+    overflow-y: auto;
+    border-radius: 18px;
+    padding: 22px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.close {
+    border: none;
+    background: transparent;
+    font-size: 25px;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.form-group {
+    margin-bottom: 12px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
+}
+
+label {
+    display: block;
+    font-size: 12px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 10px;
+    background: white;
+    color: var(--navy);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: 2px solid var(--baby-blue);
+}
+
+.save-event {
+    width: 100%;
+    border: none;
+    background: var(--navy);
+    color: white;
+    padding: 13px;
+    border-radius: 10px;
+    font-weight: bold;
+    margin-top: 8px;
+}
+
+.audio-preview {
+    margin-top: 8px;
+    width: 100%;
+}
+
+.empty {
+    color: var(--gray);
+    font-size: 13px;
+    text-align: center;
+    padding: 20px;
+}
+
+.category-badge {
+    display: inline-block;
+    background: var(--baby-blue);
+    padding: 3px 7px;
+    border-radius: 6px;
+    font-size: 10px;
+    margin-left: 5px;
+}
+
+@media(max-width: 850px) {
+    .top-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .day {
+        min-height: 80px;
+    }
+}
+
+@media(max-width: 550px) {
+    header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+    .day {
+        min-height: 65px;
+        padding: 4px;
+    }
+
+    .event-dot {
+        font-size: 9px;
+        padding: 3px;
+    }
+
+    .weekday {
+        font-size: 10px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <div>
+        <div class="logo">🧠 MindCal</div>
+        <div class="subtitle">An ADHD-friendly calendar for real life</div>
+    </div>
+
+    <div class="header-buttons">
+        <button onclick="goToday()">Today</button>
+        <button onclick="openModal()">＋ Event</button>
+    </div>
+</header>
+
+<div class="container">
+
+    <div class="stats">
+        <div class="stat">
+            <strong id="totalEvents">0</strong>
+            <span>Total events</span>
+        </div>
+
+        <div class="stat">
+            <strong id="completedEvents">0</strong>
+            <span>Completed</span>
+        </div>
+
+        <div class="stat">
+            <strong id="movedEvents">0</strong>
+            <span>Moved</span>
+        </div>
+    </div>
+
+    <div class="top-grid">
+
+        <div class="card">
+
+            <div class="calendar-header">
+
+                <div class="nav-buttons">
+                    <button onclick="changeMonth(-1)">‹</button>
+                    <button onclick="changeMonth(1)">›</button>
+                </div>
+
+                <h2 id="monthTitle"></h2>
+
+                <button class="nav-buttons" onclick="goToday()">Today</button>
+
+            </div>
+
+            <div class="weekdays">
+                <div class="weekday">Sun</div>
+                <div class="weekday">Mon</div>
+                <div class="weekday">Tue</div>
+                <div class="weekday">Wed</div>
+                <div class="weekday">Thu</div>
+                <div class="weekday">Fri</div>
+                <div class="weekday">Sat</div>
+            </div>
+
+            <div id="calendar" class="calendar-grid"></div>
+
+        </div>
+
+        <div>
+
+            <div class="card">
+
+                <button class="add-btn" onclick="openModal()">
+                    ＋ Add Event
+                </button>
+
+                <h3 class="selected-title" id="selectedDateTitle"></h3>
+
+                <div id="eventList"></div>
+
+            </div>
+
+            <br>
+
+            <div class="card brain-dump">
+
+                <h3>🧠 Brain Dump</h3>
+
+                <p style="font-size:12px;color:#627d98;">
+                    Ideas don't have to become tasks immediately.
+                    Save them here so your brain doesn't have to remember everything.
+                </p>
+
+                <textarea id="brainDump"
+                    placeholder="New screenplay idea... website idea... something you don't want to forget..."></textarea>
+
+                <button class="save-dump" onclick="saveBrainDump()">
+                    Save Brain Dump
+                </button>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- ADD EVENT MODAL -->
+
+<div class="modal" id="eventModal">
+
+<div class="modal-box">
+
+    <div class="modal-header">
+        <h2 id="modalTitle">Add Event</h2>
+        <button class="close" onclick="closeModal()">×</button>
+    </div>
+
+    <form id="eventForm">
+
+        <input type="hidden" id="eventId">
+
+        <div class="form-grid">
+
+            <div class="form-group full">
+                <label>Event title</label>
+                <input id="eventTitle" required
+                    placeholder="e.g. Write screenplay">
+            </div>
+
+            <div class="form-group">
+                <label>Category</label>
+
+                <select id="eventCategory">
+                    <option>Personal</option>
+                    <option>Work</option>
+                    <option>Study</option>
+                    <option>Writing</option>
+                    <option>Coding</option>
+                    <option>Exercise</option>
+                    <option>Social</option>
+                    <option>Chores</option>
+                    <option>Health</option>
+                    <option>Other</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Date</label>
+                <input type="date" id="eventDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>Start time</label>
+                <input type="time" id="eventStart">
+            </div>
+
+            <div class="form-group">
+                <label>End time</label>
+                <input type="time" id="eventEnd">
+            </div>
+
+            <div class="form-group full">
+                <label>Description</label>
+                <textarea id="eventDescription"
+                    placeholder="Notes, location, details..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Repeat</label>
+
+                <select id="eventRepeat">
+                    <option value="none">Does not repeat</
