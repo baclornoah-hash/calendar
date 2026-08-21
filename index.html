@@ -593,24 +593,67 @@ textarea{
 
             <div class="form-group">
 
-                <label>Start Time</label>
+    <label>Time</label>
 
-                <input
-                    id="eventStart"
-                    type="time">
+    <select id="timeType">
 
-            </div>
+        <option value="specific">
+            Specific Time
+        </option>
+
+        <option value="morning">
+            🌅 Morning
+        </option>
+
+        <option value="afternoon">
+            ☀️ Afternoon
+        </option>
+
+        <option value="evening">
+            🌆 Evening
+        </option>
+
+        <option value="night">
+            🌙 Night
+        </option>
+
+        <option value="flexible">
+            🧠 Flexible / Anytime
+        </option>
+
+        <option value="all-day">
+            📅 All Day
+        </option>
+
+    </select>
+
+</div>
 
 
-            <div class="form-group">
+<div
+    class="form-group"
+    id="specificTimeGroup">
 
-                <label>End Time</label>
+    <label>Start Time</label>
 
-                <input
-                    id="eventEnd"
-                    type="time">
+    <input
+        id="eventStart"
+        type="time">
 
-            </div>
+</div>
+
+
+<div
+    class="form-group"
+    id="endTimeGroup">
+
+    <label>End Time</label>
+
+    <input
+        id="eventEnd"
+        type="time">
+
+</div>
 
 
             <div class="form-group full">
@@ -946,11 +989,39 @@ function renderCalendar(){
             }
 
 
-            eventElement.textContent =
-                (event.start
-                    ? event.start + " "
-                    : "") +
-                event.title;
+            let displayTime = "";
+
+if(event.timeType === "morning"){
+    displayTime = "🌅 ";
+}
+
+else if(event.timeType === "afternoon"){
+    displayTime = "☀️ ";
+}
+
+else if(event.timeType === "evening"){
+    displayTime = "🌆 ";
+}
+
+else if(event.timeType === "night"){
+    displayTime = "🌙 ";
+}
+
+else if(event.timeType === "flexible"){
+    displayTime = "🧠 ";
+}
+
+else if(event.timeType === "all-day"){
+    displayTime = "📅 ";
+}
+
+else if(event.start){
+    displayTime = event.start + " ";
+}
+
+
+eventElement.textContent =
+    displayTime + event.title;
 
 
             cell.appendChild(
@@ -1483,7 +1554,51 @@ document
     }
 );
 
+/* =========================================
+   TIME TYPE
+========================================= */
 
+const timeType =
+    document.getElementById("timeType");
+
+const specificTimeGroup =
+    document.getElementById("specificTimeGroup");
+
+const endTimeGroup =
+    document.getElementById("endTimeGroup");
+
+
+function updateTimeFields(){
+
+    if(timeType.value === "specific"){
+
+        specificTimeGroup.style.display =
+            "block";
+
+        endTimeGroup.style.display =
+            "block";
+
+    }else{
+
+        specificTimeGroup.style.display =
+            "none";
+
+        endTimeGroup.style.display =
+            "none";
+
+    }
+
+}
+
+
+timeType.addEventListener(
+    "change",
+    updateTimeFields
+);
+
+
+updateTimeFields();
+    
 /* =========================================
    ALARM SELECT
 ========================================= */
@@ -1630,15 +1745,20 @@ eventForm.addEventListener(
             date:
                 date,
 
-            start:
-                document.getElementById(
-                    "eventStart"
-                ).value,
+            timeType:
+    document.getElementById(
+        "timeType"
+    ).value,
 
-            end:
-                document.getElementById(
-                    "eventEnd"
-                ).value,
+start:
+    document.getElementById(
+        "eventStart"
+    ).value,
+
+end:
+    document.getElementById(
+        "eventEnd"
+    ).value,
 
             description:
                 document.getElementById(
