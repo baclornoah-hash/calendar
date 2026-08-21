@@ -4,587 +4,565 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>MindCal — ADHD-Friendly Calendar</title>
+<title>MindCal</title>
 
 <style>
-:root {
-    --baby-blue: #bfe7f5;
-    --baby-blue-light: #eaf8fc;
-    --navy: #102a43;
-    --navy-light: #243b53;
-    --white: #ffffff;
-    --gray: #627d98;
-    --light-gray: #f4f8fb;
-    --border: #d9e8ef;
-    --green: #4caf7a;
-    --red: #d9534f;
-    --yellow: #f0b429;
-    --shadow: 0 8px 25px rgba(16,42,67,.10);
+
+:root{
+    --baby:#bfe8f5;
+    --baby2:#eaf8fc;
+    --navy:#102a43;
+    --navy2:#243b53;
+    --white:#ffffff;
+    --gray:#627d98;
+    --border:#d7e8ef;
+    --green:#4caf7a;
+    --red:#d9534f;
 }
 
-* {
-    box-sizing: border-box;
+*{
+    box-sizing:border-box;
 }
 
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: var(--baby-blue-light);
-    color: var(--navy);
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:var(--baby2);
+    color:var(--navy);
 }
 
-button,
-input,
-textarea,
-select {
-    font: inherit;
+/* HEADER */
+
+header{
+    background:var(--navy);
+    color:white;
+    padding:18px 5%;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
 }
 
-button {
-    cursor: pointer;
+.logo{
+    font-size:25px;
+    font-weight:bold;
 }
 
-header {
-    background: var(--navy);
-    color: white;
-    padding: 18px 5%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 15px;
+.subtitle{
+    font-size:12px;
+    opacity:.75;
 }
 
-.logo {
-    font-size: 24px;
-    font-weight: bold;
+header button{
+    border:0;
+    background:var(--baby);
+    color:var(--navy);
+    padding:10px 15px;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-.subtitle {
-    font-size: 12px;
-    opacity: .75;
+/* MAIN */
+
+.container{
+    width:94%;
+    max-width:1300px;
+    margin:25px auto;
 }
 
-.header-buttons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
+.layout{
+    display:grid;
+    grid-template-columns:2fr 1fr;
+    gap:20px;
 }
 
-.header-buttons button {
-    border: none;
-    border-radius: 10px;
-    padding: 10px 14px;
-    background: var(--baby-blue);
-    color: var(--navy);
-    font-weight: bold;
+.card{
+    background:white;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    box-shadow:0 8px 25px rgba(16,42,67,.08);
 }
 
-.container {
-    width: 94%;
-    max-width: 1300px;
-    margin: 25px auto;
+/* CALENDAR */
+
+.calendar-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:15px;
 }
 
-.top-grid {
-    display: grid;
-    grid-template-columns: 2fr 1fr;
-    gap: 20px;
+.calendar-top h2{
+    margin:0;
 }
 
-.card {
-    background: white;
-    border-radius: 18px;
-    padding: 20px;
-    box-shadow: var(--shadow);
-    border: 1px solid var(--border);
-}
-
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 18px;
-}
-
-.calendar-header h2 {
-    margin: 0;
-}
-
-.nav-buttons {
-    display: flex;
-    gap: 6px;
-}
-
-.nav-buttons button {
-    border: none;
-    background: var(--baby-blue);
-    color: var(--navy);
-    border-radius: 9px;
-    padding: 9px 12px;
-    font-weight: bold;
+.nav button{
+    border:0;
+    background:var(--baby);
+    color:var(--navy);
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:bold;
 }
 
 .weekdays,
-.calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
+.calendar{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
 }
 
-.weekday {
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    color: var(--gray);
-    padding: 8px 0;
+.weekday{
+    text-align:center;
+    font-size:12px;
+    font-weight:bold;
+    color:var(--gray);
+    padding:8px 0;
 }
 
-.day {
-    min-height: 105px;
-    border: 1px solid var(--border);
-    padding: 7px;
-    position: relative;
-    background: white;
-    cursor: pointer;
-    transition: .15s;
+.day{
+    min-height:105px;
+    border:1px solid var(--border);
+    padding:6px;
+    cursor:pointer;
+    background:white;
 }
 
-.day:hover {
-    background: var(--baby-blue-light);
+.day:hover{
+    background:var(--baby2);
 }
 
-.day.other-month {
-    opacity: .4;
+.day.today{
+    background:#f0fbfe;
 }
 
-.day.today {
-    background: #eef9fd;
+.day.selected{
+    outline:3px solid var(--baby);
 }
 
-.day.selected {
-    outline: 3px solid var(--baby-blue);
-    z-index: 2;
+.day-number{
+    font-weight:bold;
+    font-size:13px;
+    margin-bottom:5px;
 }
 
-.day-number {
-    font-weight: bold;
-    font-size: 13px;
-    margin-bottom: 5px;
+.event{
+    font-size:10px;
+    padding:4px;
+    margin:3px 0;
+    border-radius:5px;
+    background:var(--baby);
+    overflow:hidden;
+    white-space:nowrap;
+    text-overflow:ellipsis;
 }
 
-.event-dot {
-    display: block;
-    font-size: 11px;
-    margin: 3px 0;
-    padding: 4px 6px;
-    border-radius: 6px;
-    background: var(--baby-blue);
-    color: var(--navy);
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
+.event.completed{
+    text-decoration:line-through;
+    opacity:.5;
 }
 
-.event-dot.completed {
-    text-decoration: line-through;
-    opacity: .55;
+.event.cancelled{
+    text-decoration:line-through;
+    opacity:.35;
 }
 
-.event-dot.cancelled {
-    text-decoration: line-through;
-    opacity: .35;
+/* ADD BUTTON */
+
+.add-event{
+    width:100%;
+    padding:14px;
+    border:0;
+    border-radius:11px;
+    background:var(--navy);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    margin-bottom:18px;
 }
 
-.selected-title {
-    margin-top: 0;
+.add-event:hover{
+    background:var(--navy2);
 }
 
-.event-item {
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 12px;
-    margin-bottom: 10px;
-    background: var(--light-gray);
+/* EVENTS */
+
+.event-card{
+    background:#f6fbfd;
+    border:1px solid var(--border);
+    padding:12px;
+    border-radius:11px;
+    margin-bottom:10px;
 }
 
-.event-item h4 {
-    margin: 0 0 5px;
+.event-card h4{
+    margin:0 0 5px;
 }
 
-.event-meta {
-    font-size: 12px;
-    color: var(--gray);
-    margin-bottom: 8px;
+.event-info{
+    font-size:12px;
+    color:var(--gray);
+    margin-bottom:8px;
 }
 
-.event-actions {
-    display: flex;
-    gap: 5px;
-    flex-wrap: wrap;
+.actions{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
 }
 
-.small-btn {
-    border: none;
-    border-radius: 7px;
-    padding: 6px 9px;
-    font-size: 11px;
-    font-weight: bold;
+.actions button{
+    border:0;
+    border-radius:7px;
+    padding:6px 9px;
+    font-size:11px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-.complete-btn {
-    background: #dff5e8;
-    color: #217346;
+.complete{
+    background:#ddf5e8;
+    color:#217346;
 }
 
-.move-btn {
-    background: var(--baby-blue);
-    color: var(--navy);
+.move{
+    background:var(--baby);
+    color:var(--navy);
 }
 
-.cancel-btn {
-    background: #fff0ef;
-    color: var(--red);
+.cancel{
+    background:#fff0ef;
+    color:var(--red);
 }
 
-.delete-btn {
-    background: #eee;
-    color: #555;
+.delete{
+    background:#eeeeee;
 }
 
-.add-btn {
-    width: 100%;
-    border: none;
-    border-radius: 12px;
-    background: var(--navy);
-    color: white;
-    padding: 14px;
-    font-weight: bold;
-    margin-bottom: 15px;
+/* BRAIN DUMP */
+
+textarea{
+    width:100%;
+    min-height:130px;
+    resize:vertical;
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px;
 }
 
-.brain-dump textarea {
-    width: 100%;
-    min-height: 130px;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 10px;
-    resize: vertical;
+.save-dump{
+    border:0;
+    background:var(--baby);
+    color:var(--navy);
+    padding:10px 14px;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:8px;
 }
 
-.save-dump {
-    margin-top: 8px;
-    border: none;
-    background: var(--baby-blue);
-    color: var(--navy);
-    padding: 9px 13px;
-    border-radius: 8px;
-    font-weight: bold;
+.message{
+    font-size:12px;
+    color:var(--green);
+    margin-top:7px;
 }
 
-.stats {
-    display: grid;
-    grid-template-columns: repeat(3,1fr);
-    gap: 10px;
-    margin-bottom: 20px;
+/* MODAL */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(16,42,67,.55);
+    z-index:999;
+    align-items:center;
+    justify-content:center;
+    padding:15px;
 }
 
-.stat {
-    background: var(--light-gray);
-    border-radius: 12px;
-    padding: 12px;
-    text-align: center;
+.modal.show{
+    display:flex;
 }
 
-.stat strong {
-    display: block;
-    font-size: 22px;
+.modal-box{
+    background:white;
+    width:100%;
+    max-width:600px;
+    max-height:90vh;
+    overflow-y:auto;
+    border-radius:18px;
+    padding:22px;
 }
 
-.stat span {
-    font-size: 11px;
-    color: var(--gray);
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
 }
 
-.modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(16,42,67,.55);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    z-index: 100;
+.modal-header h2{
+    margin-top:0;
 }
 
-.modal.active {
-    display: flex;
+.close{
+    border:0;
+    background:none;
+    font-size:28px;
+    cursor:pointer;
 }
 
-.modal-box {
-    background: white;
-    width: 100%;
-    max-width: 600px;
-    max-height: 92vh;
-    overflow-y: auto;
-    border-radius: 18px;
-    padding: 22px;
-    box-shadow: 0 20px 60px rgba(0,0,0,.2);
+.form-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
 }
 
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.form-group{
+    margin-bottom:10px;
 }
 
-.close {
-    border: none;
-    background: transparent;
-    font-size: 25px;
+.full{
+    grid-column:1 / -1;
 }
 
-.form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-}
-
-.form-group {
-    margin-bottom: 12px;
-}
-
-.form-group.full {
-    grid-column: 1 / -1;
-}
-
-label {
-    display: block;
-    font-size: 12px;
-    font-weight: bold;
-    margin-bottom: 5px;
+label{
+    display:block;
+    font-size:12px;
+    font-weight:bold;
+    margin-bottom:5px;
 }
 
 input,
-textarea,
-select {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 9px;
-    padding: 10px;
-    background: white;
-    color: var(--navy);
+select{
+    width:100%;
+    padding:10px;
+    border:1px solid var(--border);
+    border-radius:9px;
+    background:white;
 }
 
-input:focus,
-textarea:focus,
-select:focus {
-    outline: 2px solid var(--baby-blue);
+textarea{
+    font-family:Arial,sans-serif;
 }
 
-.save-event {
-    width: 100%;
-    border: none;
-    background: var(--navy);
-    color: white;
-    padding: 13px;
-    border-radius: 10px;
-    font-weight: bold;
-    margin-top: 8px;
+.save-event{
+    width:100%;
+    border:0;
+    background:var(--navy);
+    color:white;
+    padding:14px;
+    border-radius:10px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
 }
 
-.audio-preview {
-    margin-top: 8px;
-    width: 100%;
+.audio-preview{
+    width:100%;
+    margin-top:8px;
 }
 
-.empty {
-    color: var(--gray);
-    font-size: 13px;
-    text-align: center;
-    padding: 20px;
+.empty{
+    text-align:center;
+    color:var(--gray);
+    padding:20px;
+    font-size:13px;
 }
 
-.category-badge {
-    display: inline-block;
-    background: var(--baby-blue);
-    padding: 3px 7px;
-    border-radius: 6px;
-    font-size: 10px;
-    margin-left: 5px;
+/* MOBILE */
+
+@media(max-width:850px){
+
+    .layout{
+        grid-template-columns:1fr;
+    }
+
 }
 
-@media(max-width: 850px) {
-    .top-grid {
-        grid-template-columns: 1fr;
+@media(max-width:550px){
+
+    header{
+        flex-direction:column;
+        align-items:flex-start;
     }
 
-    .day {
-        min-height: 80px;
+    .form-grid{
+        grid-template-columns:1fr;
     }
+
+    .full{
+        grid-column:auto;
+    }
+
+    .day{
+        min-height:70px;
+    }
+
+    .event{
+        font-size:9px;
+    }
+
 }
 
-@media(max-width: 550px) {
-    header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .form-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .form-group.full {
-        grid-column: auto;
-    }
-
-    .day {
-        min-height: 65px;
-        padding: 4px;
-    }
-
-    .event-dot {
-        font-size: 9px;
-        padding: 3px;
-    }
-
-    .weekday {
-        font-size: 10px;
-    }
-}
 </style>
 </head>
+
 
 <body>
 
 <header>
+
     <div>
         <div class="logo">🧠 MindCal</div>
-        <div class="subtitle">An ADHD-friendly calendar for real life</div>
+        <div class="subtitle">
+            An ADHD-friendly calendar
+        </div>
     </div>
 
-    <div class="header-buttons">
-        <button onclick="goToday()">Today</button>
-        <button onclick="openModal()">＋ Event</button>
-    </div>
+    <button id="headerAdd">
+        ＋ Add Event
+    </button>
+
 </header>
+
 
 <div class="container">
 
-    <div class="stats">
-        <div class="stat">
-            <strong id="totalEvents">0</strong>
-            <span>Total events</span>
+<div class="layout">
+
+
+<!-- CALENDAR -->
+
+<div class="card">
+
+    <div class="calendar-top">
+
+        <div class="nav">
+            <button id="previousMonth">‹</button>
+            <button id="nextMonth">›</button>
         </div>
 
-        <div class="stat">
-            <strong id="completedEvents">0</strong>
-            <span>Completed</span>
-        </div>
+        <h2 id="monthTitle"></h2>
 
-        <div class="stat">
-            <strong id="movedEvents">0</strong>
-            <span>Moved</span>
-        </div>
-    </div>
-
-    <div class="top-grid">
-
-        <div class="card">
-
-            <div class="calendar-header">
-
-                <div class="nav-buttons">
-                    <button onclick="changeMonth(-1)">‹</button>
-                    <button onclick="changeMonth(1)">›</button>
-                </div>
-
-                <h2 id="monthTitle"></h2>
-
-                <button class="nav-buttons" onclick="goToday()">Today</button>
-
-            </div>
-
-            <div class="weekdays">
-                <div class="weekday">Sun</div>
-                <div class="weekday">Mon</div>
-                <div class="weekday">Tue</div>
-                <div class="weekday">Wed</div>
-                <div class="weekday">Thu</div>
-                <div class="weekday">Fri</div>
-                <div class="weekday">Sat</div>
-            </div>
-
-            <div id="calendar" class="calendar-grid"></div>
-
-        </div>
-
-        <div>
-
-            <div class="card">
-
-                <button class="add-btn" onclick="openModal()">
-                    ＋ Add Event
-                </button>
-
-                <h3 class="selected-title" id="selectedDateTitle"></h3>
-
-                <div id="eventList"></div>
-
-            </div>
-
-            <br>
-
-            <div class="card brain-dump">
-
-                <h3>🧠 Brain Dump</h3>
-
-                <p style="font-size:12px;color:#627d98;">
-                    Ideas don't have to become tasks immediately.
-                    Save them here so your brain doesn't have to remember everything.
-                </p>
-
-                <textarea id="brainDump"
-                    placeholder="New screenplay idea... website idea... something you don't want to forget..."></textarea>
-
-                <button class="save-dump" onclick="saveBrainDump()">
-                    Save Brain Dump
-                </button>
-
-            </div>
-
+        <div class="nav">
+            <button id="todayButton">
+                Today
+            </button>
         </div>
 
     </div>
+
+
+    <div class="weekdays">
+
+        <div class="weekday">Sun</div>
+        <div class="weekday">Mon</div>
+        <div class="weekday">Tue</div>
+        <div class="weekday">Wed</div>
+        <div class="weekday">Thu</div>
+        <div class="weekday">Fri</div>
+        <div class="weekday">Sat</div>
+
+    </div>
+
+
+    <div id="calendar" class="calendar"></div>
 
 </div>
 
 
-<!-- ADD EVENT MODAL -->
+<!-- RIGHT SIDE -->
+
+<div>
+
+
+<div class="card">
+
+    <button class="add-event" id="addEventButton">
+        ＋ Add Event
+    </button>
+
+    <h3 id="selectedTitle"></h3>
+
+    <div id="eventList"></div>
+
+</div>
+
+
+<br>
+
+
+<div class="card">
+
+    <h3>🧠 Brain Dump</h3>
+
+    <p style="font-size:12px;color:#627d98;">
+        Save ideas here without turning them into calendar events.
+    </p>
+
+    <textarea
+        id="brainDump"
+        placeholder="New screenplay idea... website idea... something you don't want to forget..."></textarea>
+
+    <button class="save-dump" id="saveBrainDump">
+        Save Brain Dump
+    </button>
+
+    <div id="brainMessage" class="message"></div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- EVENT MODAL -->
 
 <div class="modal" id="eventModal">
 
 <div class="modal-box">
 
     <div class="modal-header">
-        <h2 id="modalTitle">Add Event</h2>
-        <button class="close" onclick="closeModal()">×</button>
+
+        <h2>Add Event</h2>
+
+        <button class="close" id="closeModal">
+            ×
+        </button>
+
     </div>
+
 
     <form id="eventForm">
 
-        <input type="hidden" id="eventId">
-
         <div class="form-grid">
 
+
             <div class="form-group full">
-                <label>Event title</label>
-                <input id="eventTitle" required
-                    placeholder="e.g. Write screenplay">
+
+                <label>Event Title</label>
+
+                <input
+                    id="eventTitle"
+                    type="text"
+                    placeholder="Example: Write screenplay"
+                    required>
+
             </div>
 
+
             <div class="form-group">
+
                 <label>Category</label>
 
                 <select id="eventCategory">
+
                     <option>Personal</option>
                     <option>Work</option>
                     <option>Study</option>
@@ -595,32 +573,1227 @@ select:focus {
                     <option>Chores</option>
                     <option>Health</option>
                     <option>Other</option>
+
                 </select>
+
             </div>
 
+
             <div class="form-group">
+
                 <label>Date</label>
-                <input type="date" id="eventDate" required>
+
+                <input
+                    id="eventDate"
+                    type="date"
+                    required>
+
             </div>
 
-            <div class="form-group">
-                <label>Start time</label>
-                <input type="time" id="eventStart">
-            </div>
 
             <div class="form-group">
-                <label>End time</label>
-                <input type="time" id="eventEnd">
+
+                <label>Start Time</label>
+
+                <input
+                    id="eventStart"
+                    type="time">
+
             </div>
+
+
+            <div class="form-group">
+
+                <label>End Time</label>
+
+                <input
+                    id="eventEnd"
+                    type="time">
+
+            </div>
+
 
             <div class="form-group full">
+
                 <label>Description</label>
-                <textarea id="eventDescription"
+
+                <textarea
+                    id="eventDescription"
                     placeholder="Notes, location, details..."></textarea>
+
             </div>
 
+
             <div class="form-group">
+
                 <label>Repeat</label>
 
                 <select id="eventRepeat">
-                    <option value="none">Does not repeat</
+
+                    <option value="none">
+                        Does not repeat
+                    </option>
+
+                    <option value="daily">
+                        Every day
+                    </option>
+
+                    <option value="weekly">
+                        Every week
+                    </option>
+
+                    <option value="monthly">
+                        Every month
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Alarm</label>
+
+                <select id="alarmType">
+
+                    <option value="none">
+                        No alarm
+                    </option>
+
+                    <option value="default">
+                        Default alarm
+                    </option>
+
+                    <option value="custom">
+                        Upload music/audio
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div
+                class="form-group full"
+                id="audioGroup"
+                style="display:none;">
+
+                <label>Upload Alarm Music</label>
+
+                <input
+                    id="audioFile"
+                    type="file"
+                    accept="audio/*">
+
+                <audio
+                    id="audioPreview"
+                    class="audio-preview"
+                    controls
+                    style="display:none;">
+                </audio>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            class="save-event"
+            type="submit">
+
+            Save Event
+
+        </button>
+
+    </form>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* =========================================
+   DATA
+========================================= */
+
+let events =
+    JSON.parse(
+        localStorage.getItem("mindcal_events")
+    ) || [];
+
+
+let brainDump =
+    localStorage.getItem(
+        "mindcal_brain_dump"
+    ) || "";
+
+
+let currentDate = new Date();
+
+let selectedDate = new Date();
+
+let uploadedAudio = null;
+
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const calendar =
+    document.getElementById("calendar");
+
+const modal =
+    document.getElementById("eventModal");
+
+const eventForm =
+    document.getElementById("eventForm");
+
+const brainDumpBox =
+    document.getElementById("brainDump");
+
+
+brainDumpBox.value = brainDump;
+
+
+/* =========================================
+   DATE FUNCTION
+========================================= */
+
+function getDateKey(date){
+
+    let year =
+        date.getFullYear();
+
+    let month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2,"0");
+
+    let day =
+        String(
+            date.getDate()
+        ).padStart(2,"0");
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================
+   SAVE DATA
+========================================= */
+
+function saveEvents(){
+
+    localStorage.setItem(
+        "mindcal_events",
+        JSON.stringify(events)
+    );
+
+}
+
+
+/* =========================================
+   RENDER CALENDAR
+========================================= */
+
+function renderCalendar(){
+
+    calendar.innerHTML = "";
+
+    const year =
+        currentDate.getFullYear();
+
+    const month =
+        currentDate.getMonth();
+
+
+    document.getElementById(
+        "monthTitle"
+    ).textContent =
+        currentDate.toLocaleDateString(
+            undefined,
+            {
+                month:"long",
+                year:"numeric"
+            }
+        );
+
+
+    const firstDay =
+        new Date(
+            year,
+            month,
+            1
+        ).getDay();
+
+
+    const days =
+        new Date(
+            year,
+            month + 1,
+            0
+        ).getDate();
+
+
+    for(
+        let i = 0;
+        i < 42;
+        i++
+    ){
+
+        const number =
+            i - firstDay + 1;
+
+
+        const cellDate =
+            new Date(
+                year,
+                month,
+                number
+            );
+
+
+        const cell =
+            document.createElement("div");
+
+
+        cell.className = "day";
+
+
+        const key =
+            getDateKey(cellDate);
+
+
+        if(
+            key ===
+            getDateKey(new Date())
+        ){
+
+            cell.classList.add("today");
+
+        }
+
+
+        if(
+            key ===
+            getDateKey(selectedDate)
+        ){
+
+            cell.classList.add("selected");
+
+        }
+
+
+        const numberElement =
+            document.createElement("div");
+
+
+        numberElement.className =
+            "day-number";
+
+
+        numberElement.textContent =
+            cellDate.getDate();
+
+
+        cell.appendChild(
+            numberElement
+        );
+
+
+        const dayEvents =
+            getEventsForDate(key);
+
+
+        dayEvents
+        .slice(0,4)
+        .forEach(function(event){
+
+            const eventElement =
+                document.createElement("div");
+
+
+            eventElement.className =
+                "event";
+
+
+            if(
+                event.status ===
+                "completed"
+            ){
+
+                eventElement.classList.add(
+                    "completed"
+                );
+
+            }
+
+
+            if(
+                event.status ===
+                "cancelled"
+            ){
+
+                eventElement.classList.add(
+                    "cancelled"
+                );
+
+            }
+
+
+            eventElement.textContent =
+                (event.start
+                    ? event.start + " "
+                    : "") +
+                event.title;
+
+
+            cell.appendChild(
+                eventElement
+            );
+
+        });
+
+
+        cell.addEventListener(
+            "click",
+            function(){
+
+                selectedDate =
+                    new Date(cellDate);
+
+                renderCalendar();
+
+                renderEvents();
+
+            }
+        );
+
+
+        calendar.appendChild(cell);
+
+    }
+
+}
+
+
+/* =========================================
+   GET EVENTS
+========================================= */
+
+function getEventsForDate(date){
+
+    return events.filter(
+        function(event){
+
+            if(
+                event.date === date
+            ){
+
+                return true;
+
+            }
+
+
+            if(
+                event.repeat === "daily"
+            ){
+
+                return (
+                    new Date(date) >=
+                    new Date(event.date)
+                );
+
+            }
+
+
+            if(
+                event.repeat === "weekly"
+            ){
+
+                const start =
+                    new Date(
+                        event.date
+                    );
+
+                const current =
+                    new Date(
+                        date
+                    );
+
+
+                const difference =
+                    Math.floor(
+                        (
+                            current -
+                            start
+                        ) /
+                        86400000
+                    );
+
+
+                return (
+                    difference >= 0 &&
+                    difference % 7 === 0
+                );
+
+            }
+
+
+            if(
+                event.repeat === "monthly"
+            ){
+
+                const start =
+                    new Date(
+                        event.date
+                    );
+
+                const current =
+                    new Date(
+                        date
+                    );
+
+
+                return (
+                    current >= start &&
+                    current.getDate() ===
+                    start.getDate()
+                );
+
+            }
+
+
+            return false;
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   RENDER EVENT LIST
+========================================= */
+
+function renderEvents(){
+
+    const key =
+        getDateKey(selectedDate);
+
+
+    document.getElementById(
+        "selectedTitle"
+    ).textContent =
+        selectedDate.toLocaleDateString(
+            undefined,
+            {
+                weekday:"long",
+                month:"long",
+                day:"numeric",
+                year:"numeric"
+            }
+        );
+
+
+    const list =
+        document.getElementById(
+            "eventList"
+        );
+
+
+    list.innerHTML = "";
+
+
+    const dayEvents =
+        getEventsForDate(key);
+
+
+    if(
+        dayEvents.length === 0
+    ){
+
+        list.innerHTML =
+            `<div class="empty">
+                No events scheduled.
+            </div>`;
+
+        return;
+
+    }
+
+
+    dayEvents.forEach(
+        function(event){
+
+            const card =
+                document.createElement(
+                    "div"
+                );
+
+
+            card.className =
+                "event-card";
+
+
+            let time = "";
+
+            if(event.start){
+
+                time += event.start;
+
+            }
+
+            if(event.end){
+
+                time +=
+                    " – " +
+                    event.end;
+
+            }
+
+
+            card.innerHTML = `
+
+                <h4>
+                    ${escapeHTML(event.title)}
+                </h4>
+
+                <div class="event-info">
+
+                    ${escapeHTML(event.category)}
+
+                    ${time ? " · " + time : ""}
+
+                </div>
+
+                ${
+                    event.description
+                    ?
+                    `<div style="
+                        font-size:13px;
+                        margin-bottom:8px;
+                    ">
+                        ${escapeHTML(
+                            event.description
+                        )}
+                    </div>`
+                    :
+                    ""
+                }
+
+
+                <div class="actions">
+
+                    <button
+                        class="complete"
+                        data-id="${event.id}"
+                        data-action="complete">
+
+                        ✓ Complete
+
+                    </button>
+
+
+                    <button
+                        class="move"
+                        data-id="${event.id}"
+                        data-action="move">
+
+                        ↪ Move
+
+                    </button>
+
+
+                    <button
+                        class="cancel"
+                        data-id="${event.id}"
+                        data-action="cancel">
+
+                        ✕ Cancel
+
+                    </button>
+
+
+                    <button
+                        class="delete"
+                        data-id="${event.id}"
+                        data-action="delete">
+
+                        🗑 Delete
+
+                    </button>
+
+                </div>
+            `;
+
+
+            list.appendChild(card);
+
+        }
+    );
+
+}
+
+
+/* =========================================
+   EVENT BUTTON ACTIONS
+========================================= */
+
+document
+.getElementById("eventList")
+.addEventListener(
+    "click",
+    function(e){
+
+        const button =
+            e.target.closest("button");
+
+
+        if(!button) return;
+
+
+        const id =
+            button.dataset.id;
+
+
+        const action =
+            button.dataset.action;
+
+
+        const event =
+            events.find(
+                function(item){
+                    return item.id === id;
+                }
+            );
+
+
+        if(!event) return;
+
+
+        if(
+            action ===
+            "complete"
+        ){
+
+            event.status =
+                "completed";
+
+        }
+
+
+        if(
+            action ===
+            "cancel"
+        ){
+
+            event.status =
+                "cancelled";
+
+        }
+
+
+        if(
+            action ===
+            "delete"
+        ){
+
+            if(
+                confirm(
+                    "Delete this event permanently?"
+                )
+            ){
+
+                events =
+                    events.filter(
+                        function(item){
+                            return item.id !== id;
+                        }
+                    );
+
+            }
+
+        }
+
+
+        if(
+            action ===
+            "move"
+        ){
+
+            const newDate =
+                prompt(
+                    "Move event to date:\n\nYYYY-MM-DD",
+                    event.date
+                );
+
+
+            if(newDate){
+
+                event.date =
+                    newDate;
+
+                event.status =
+                    "moved";
+
+                event.moved =
+                    (event.moved || 0) + 1;
+
+            }
+
+        }
+
+
+        saveEvents();
+
+        renderCalendar();
+
+        renderEvents();
+
+    }
+);
+
+
+/* =========================================
+   MODAL
+========================================= */
+
+function openModal(){
+
+    modal.classList.add("show");
+
+
+    document.getElementById(
+        "eventDate"
+    ).value =
+        getDateKey(selectedDate);
+
+}
+
+
+function closeModal(){
+
+    modal.classList.remove(
+        "show"
+    );
+
+    eventForm.reset();
+
+    uploadedAudio = null;
+
+    document.getElementById(
+        "audioGroup"
+    ).style.display =
+        "none";
+
+    document.getElementById(
+        "audioPreview"
+    ).style.display =
+        "none";
+
+}
+
+
+/* =========================================
+   OPEN BUTTONS
+========================================= */
+
+document
+.getElementById("addEventButton")
+.addEventListener(
+    "click",
+    openModal
+);
+
+
+document
+.getElementById("headerAdd")
+.addEventListener(
+    "click",
+    openModal
+);
+
+
+document
+.getElementById("closeModal")
+.addEventListener(
+    "click",
+    closeModal
+);
+
+
+/* =========================================
+   DATE / MONTH
+========================================= */
+
+document
+.getElementById("previousMonth")
+.addEventListener(
+    "click",
+    function(){
+
+        currentDate.setMonth(
+            currentDate.getMonth() - 1
+        );
+
+        renderCalendar();
+
+    }
+);
+
+
+document
+.getElementById("nextMonth")
+.addEventListener(
+    "click",
+    function(){
+
+        currentDate.setMonth(
+            currentDate.getMonth() + 1
+        );
+
+        renderCalendar();
+
+    }
+);
+
+
+document
+.getElementById("todayButton")
+.addEventListener(
+    "click",
+    function(){
+
+        currentDate =
+            new Date();
+
+        selectedDate =
+            new Date();
+
+        renderCalendar();
+
+        renderEvents();
+
+    }
+);
+
+
+/* =========================================
+   ALARM SELECT
+========================================= */
+
+document
+.getElementById("alarmType")
+.addEventListener(
+    "change",
+    function(){
+
+        const group =
+            document.getElementById(
+                "audioGroup"
+            );
+
+
+        if(
+            this.value ===
+            "custom"
+        ){
+
+            group.style.display =
+                "block";
+
+        }else{
+
+            group.style.display =
+                "none";
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   AUDIO UPLOAD
+========================================= */
+
+document
+.getElementById("audioFile")
+.addEventListener(
+    "change",
+    function(){
+
+        const file =
+            this.files[0];
+
+
+        if(!file) return;
+
+
+        const reader =
+            new FileReader();
+
+
+        reader.onload =
+            function(e){
+
+                uploadedAudio =
+                    e.target.result;
+
+
+                const preview =
+                    document.getElementById(
+                        "audioPreview"
+                    );
+
+
+                preview.src =
+                    uploadedAudio;
+
+
+                preview.style.display =
+                    "block";
+
+            };
+
+
+        reader.readAsDataURL(file);
+
+    }
+);
+
+
+/* =========================================
+   SAVE EVENT
+========================================= */
+
+eventForm.addEventListener(
+    "submit",
+    function(e){
+
+        e.preventDefault();
+
+
+        const title =
+            document.getElementById(
+                "eventTitle"
+            ).value.trim();
+
+
+        const date =
+            document.getElementById(
+                "eventDate"
+            ).value;
+
+
+        if(!title){
+
+            alert(
+                "Please enter an event title."
+            );
+
+            return;
+
+        }
+
+
+        if(!date){
+
+            alert(
+                "Please choose a date."
+            );
+
+            return;
+
+        }
+
+
+        const newEvent = {
+
+            id:
+                Date.now().toString(),
+
+            title:
+                title,
+
+            category:
+                document.getElementById(
+                    "eventCategory"
+                ).value,
+
+            date:
+                date,
+
+            start:
+                document.getElementById(
+                    "eventStart"
+                ).value,
+
+            end:
+                document.getElementById(
+                    "eventEnd"
+                ).value,
+
+            description:
+                document.getElementById(
+                    "eventDescription"
+                ).value,
+
+            repeat:
+                document.getElementById(
+                    "eventRepeat"
+                ).value,
+
+            alarm:
+                document.getElementById(
+                    "alarmType"
+                ).value,
+
+            audio:
+                uploadedAudio,
+
+            status:
+                "scheduled",
+
+            moved:
+                0
+
+        };
+
+
+        events.push(
+            newEvent
+        );
+
+
+        saveEvents();
+
+
+        selectedDate =
+            new Date(
+                date + "T00:00:00"
+            );
+
+
+        currentDate =
+            new Date(
+                date + "T00:00:00"
+            );
+
+
+        closeModal();
+
+
+        renderCalendar();
+
+        renderEvents();
+
+
+        alert(
+            "Event saved successfully! 📅"
+        );
+
+    }
+);
+
+
+/* =========================================
+   BRAIN DUMP
+========================================= */
+
+document
+.getElementById("saveBrainDump")
+.addEventListener(
+    "click",
+    function(){
+
+        const text =
+            document.getElementById(
+                "brainDump"
+            ).value;
+
+
+        localStorage.setItem(
+            "mindcal_brain_dump",
+            text
+        );
+
+
+        const message =
+            document.getElementById(
+                "brainMessage"
+            );
+
+
+        message.textContent =
+            "✓ Brain dump saved!";
+
+
+        setTimeout(
+            function(){
+
+                message.textContent =
+                    "";
+
+            },
+            2500
+        );
+
+    }
+);
+
+
+/* =========================================
+   ESCAPE HTML
+========================================= */
+
+function escapeHTML(text){
+
+    return String(text)
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;")
+        .replaceAll('"',"&quot;")
+        .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================================
+   CLOSE MODAL OUTSIDE
+========================================= */
+
+modal.addEventListener(
+    "click",
+    function(e){
+
+        if(
+            e.target === modal
+        ){
+
+            closeModal();
+
+        }
+
+    }
+);
+
+
+/* =========================================
+   INITIAL LOAD
+========================================= */
+
+renderCalendar();
+
+renderEvents();
+
+</script>
+
+</body>
+</html>
