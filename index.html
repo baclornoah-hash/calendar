@@ -573,19 +573,9 @@ textarea{
         Today
     </button>
 
-    <button id="monthViewButton">
-        Month
-    </button>
-
-    <button id="weekViewButton">
-        Week
-    </button>
-
 </div>
 
 </div>
-
-<div class="view-switcher">  
 
 <div class="view-switcher">
 
@@ -614,8 +604,6 @@ textarea{
 
 
     <div id="calendar" class="calendar"></div>
-
-    <div id="weekCalendar" class="week-calendar" style="display:none;"></div>
 
     <div id="weekCalendar" class="week-calendar"></div>
 
@@ -2951,42 +2939,6 @@ modal.addEventListener(
             closeModal();
 
         }
-
-    }
-);
-
-
-/* =========================================
-   VIEW SWITCHING
-========================================= */
-
-monthViewButton.addEventListener(
-    "click",
-    function(){
-
-        calendar.style.display = "grid";
-
-        weekCalendar.style.display = "none";
-
-        monthViewButton.classList.add("active");
-
-        weekViewButton.classList.remove("active");
-
-    }
-);
-
-
-weekViewButton.addEventListener(
-    "click",
-    function(){
-
-        calendar.style.display = "none";
-
-        weekCalendar.style.display = "block";
-
-        monthViewButton.classList.remove("active");
-
-        weekViewButton.classList.add("active");
 
     }
 );
