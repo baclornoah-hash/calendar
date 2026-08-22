@@ -411,6 +411,28 @@ textarea{
 
 }
 
+    .day-selector{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+}
+
+.day-option{
+    display:flex;
+    align-items:center;
+    gap:5px;
+    background:var(--baby2);
+    border:1px solid var(--border);
+    padding:8px 10px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.day-option input{
+    width:auto;
+}
+    
 </style>
 </head>
 
@@ -674,30 +696,157 @@ textarea{
 
             <div class="form-group">
 
-                <label>Repeat</label>
+    <label>Repeat</label>
 
-                <select id="eventRepeat">
+    <select id="eventRepeat">
 
-                    <option value="none">
-                        Does not repeat
-                    </option>
+        <option value="none">
+            Does not repeat
+        </option>
 
-                    <option value="daily">
-                        Every day
-                    </option>
+        <option value="daily">
+            Every day
+        </option>
 
-                    <option value="weekly">
-                        Every week
-                    </option>
+        <option value="weekly">
+            Every week
+        </option>
 
-                    <option value="monthly">
-                        Every month
-                    </option>
+        <option value="monthly">
+            Every month
+        </option>
 
-                </select>
+        <option value="custom">
+            Custom
+        </option>
 
-            </div>
+    </select>
 
+</div>
+
+            <!-- CUSTOM REPEAT OPTIONS -->
+
+<div
+    class="form-group full"
+    id="customRepeatGroup"
+    style="display:none;">
+
+    <label>Repeat On</label>
+
+    <div class="day-selector">
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="0"
+                class="repeat-day">
+            Sun
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="1"
+                class="repeat-day">
+            Mon
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="2"
+                class="repeat-day">
+            Tue
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="3"
+                class="repeat-day">
+            Wed
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="4"
+                class="repeat-day">
+            Thu
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="5"
+                class="repeat-day">
+            Fri
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="6"
+                class="repeat-day">
+            Sat
+        </label>
+
+    </div>
+
+
+    <label style="margin-top:15px;">
+        Ends
+    </label>
+
+    <select id="repeatEndType">
+
+        <option value="never">
+            Never
+        </option>
+
+        <option value="date">
+            On a specific date
+        </option>
+
+        <option value="occurrences">
+            After a number of occurrences
+        </option>
+
+    </select>
+
+
+    <div
+        id="repeatEndDateGroup"
+        style="display:none; margin-top:10px;">
+
+        <label>
+            End Date
+        </label>
+
+        <input
+            id="repeatEndDate"
+            type="date">
+
+    </div>
+
+
+    <div
+        id="repeatOccurrencesGroup"
+        style="display:none; margin-top:10px;">
+
+        <label>
+            Number of Occurrences
+        </label>
+
+        <input
+            id="repeatOccurrences"
+            type="number"
+            min="1"
+            placeholder="Example: 10">
+
+    </div>
+
+</div>
 
             <div class="form-group">
 
@@ -841,6 +990,44 @@ function saveEvents(){
         "mindcal_events",
         JSON.stringify(events)
     );
+
+}
+
+    function getCustomRepeatSettings(){
+
+    const days = [];
+
+    document
+    .querySelectorAll(".repeat-day:checked")
+    .forEach(function(checkbox){
+
+        days.push(
+            Number(checkbox.value)
+        );
+
+    });
+
+
+    return {
+
+        days: days,
+
+        endType:
+            document.getElementById(
+                "repeatEndType"
+            ).value,
+
+        endDate:
+            document.getElementById(
+                "repeatEndDate"
+            ).value,
+
+        occurrences:
+            document.getElementById(
+                "repeatOccurrences"
+            ).value
+
+    };
 
 }
 
@@ -1748,6 +1935,91 @@ timeType.addEventListener(
 
 
 updateTimeFields();
+
+    /* =========================================
+   CUSTOM REPEAT
+========================================= */
+
+const eventRepeat =
+    document.getElementById(
+        "eventRepeat"
+    );
+
+const customRepeatGroup =
+    document.getElementById(
+        "customRepeatGroup"
+    );
+
+
+eventRepeat.addEventListener(
+    "change",
+    function(){
+
+        if(
+            this.value === "custom"
+        ){
+
+            customRepeatGroup.style.display =
+                "block";
+
+        }else{
+
+            customRepeatGroup.style.display =
+                "none";
+
+        }
+
+    }
+);
+
+    const repeatEndType =
+    document.getElementById(
+        "repeatEndType"
+    );
+
+const repeatEndDateGroup =
+    document.getElementById(
+        "repeatEndDateGroup"
+    );
+
+const repeatOccurrencesGroup =
+    document.getElementById(
+        "repeatOccurrencesGroup"
+    );
+
+
+repeatEndType.addEventListener(
+    "change",
+    function(){
+
+        repeatEndDateGroup.style.display =
+            "none";
+
+        repeatOccurrencesGroup.style.display =
+            "none";
+
+
+        if(
+            this.value === "date"
+        ){
+
+            repeatEndDateGroup.style.display =
+                "block";
+
+        }
+
+
+        if(
+            this.value === "occurrences"
+        ){
+
+            repeatOccurrencesGroup.style.display =
+                "block";
+
+        }
+
+    }
+);
     
 /* =========================================
    ALARM SELECT
@@ -2019,6 +2291,9 @@ eventForm.addEventListener(
                 document.getElementById(
                     "eventRepeat"
                 ).value,
+
+                    customRepeat:
+    getCustomRepeatSettings(),
 
             alarm:
                 document.getElementById(
