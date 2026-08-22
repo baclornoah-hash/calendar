@@ -138,10 +138,9 @@ header button{
     background:#f0fbfe;
 }
 
-.day.{
+.day.selected{
     outline:3px solid var(--baby);
 }
-
 .day-number{
     font-weight:bold;
     font-size:13px;
@@ -1217,7 +1216,7 @@ let brainDump =
 
 let currentDate = new Date();
 
-let Date = new Date();
+    let selectedDate = new Date();
 
 let uploadedAudio = null;
 
@@ -1233,17 +1232,17 @@ const calendar =
     document.getElementById("weekCalendar");
 
 const monthViewButton =
-    document.getE("monthViewButton");
+    document.getElementById("monthViewButton");
 
 const weekViewButton =
-    document.getE("weekViewButton");
+    document.getElementById("weekViewButton");
 
 const modal =
-    document.getE("eventModal");
+    document.getElementById("eventModal");
 
 const eventForm =
-    document.getE("eventForm");
-
+    document.getElementById("eventForm");
+    
 const brainDumpBox =
     document.getE("brainDump");
 
@@ -1345,7 +1344,7 @@ function renderCalendar(){
     document.getElementById(
         "monthTitle"
     ).textContent =
-        currentDate.toLocaleDateString(
+        currentselectedDate.toLocaleDateString(
             undefined,
             {
                 month:"long",
@@ -1410,13 +1409,13 @@ function renderCalendar(){
 
 
         if(
-            key ===
-            getDateKey(Date)
-        ){
+    key ===
+    getDateKey(selectedDate)
+){
 
-            cell.classList.add("");
+    cell.classList.add("selected");
 
-        }
+}
 
 
         const numberElement =
@@ -1522,8 +1521,8 @@ eventElement.textContent =
             "click",
             function(){
 
-                Date =
-                    new Date(cellDate);
+                selectedDate =
+    new Date(cellDate);
 
                 renderCalendar();
 
@@ -1767,8 +1766,8 @@ function renderWeekCalendar(){
                 "click",
                 function(){
 
-                    Date =
-                        new Date(date);
+                    selectedDate =
+    new Date(date);
 
                     renderCalendar();
 
@@ -1799,7 +1798,7 @@ function getEventsForDate(date){
     return events.filter(function(event){
 
         const current =
-            new Date(Sdate + "T00:00:00");
+            new Date(date + "T00:00:00");
 
         const start =
             new Date(
@@ -2022,13 +2021,12 @@ function getEventsForDate(date){
 function renderEvents(){
 
     const key =
-        getDateKey(Date);
-
+    getDateKey(selectedDate);
 
     document.getElementById(
         "Title"
     ).textContent =
-        Date.toLocaleDateString(
+        selectedDate.toLocaleDateString(
             undefined,
             {
                 weekday:"long",
@@ -2223,21 +2221,12 @@ document
 
         if(!event) return;
 
-if(
-    action ===
-    "edit"
-){
+if(action === "edit"){
 
     openEditModal(event);
 
     return;
 
-    document.getElementById(
-    "timeType"
-).value =
-    event.timeType || "specific";
-
-updateTimeFields();
 }
         
         if(
@@ -2298,25 +2287,6 @@ updateTimeFields();
         event.startDate = newDate;
         event.endDate = newDate;
 
-        event.status = "moved";
-
-        event.moved =
-            (event.moved || 0) + 1;
-
-    }
-
-}
-
-                event.status =
-                    "moved";
-
-                event.moved =
-                    (event.moved || 0) + 1;
-
-            }
-
-        }
-
 
         saveEvents();
 
@@ -2338,46 +2308,15 @@ function openModal(){
 
 
     document.getElementById(
-        "eventStartDate"
-    ).value =
-        getDateKey(Date);
+    "eventStartDate"
+).value =
+    getDateKey(selectedDate);
 
 
     document.getElementById(
-        "eventEndDate"
-    ).value =
-        getDateKey(Date);
-
-}
-
-
-function closeModal(){
-
-    modal.classList.remove(
-        "show"
-    );
-
-
-    eventForm.reset();
-
-
-    /* Clear edit mode */
-
-    delete eventForm.dataset.editingId;
-
-
-    uploadedAudio = null;
-
-
-    /* Change title back to Add Event */
-
-    document.querySelector(
-        ".modal-header h2"
-    ).textContent =
-        "Add Event";
-
-
-    /* Hide custom audio */
+    "eventEndDate"
+).value =
+    getDateKecustom audio */
 
     document.getElementById(
         "audioGroup"
@@ -2606,12 +2545,12 @@ document
             weekViewButton.classList.contains("active")
         ){
 
-            Date.setDate(
-                Date.getDate() - 7
-            );
+            selectedDate.setDate(
+    selectedDate.getDate() - 7
+);
 
             currentDate =
-                new Date(Date);
+                new Date(selectedDate);
 
             renderWeekCalendar();
             renderEvents();
@@ -2640,12 +2579,12 @@ document
             weekViewButton.classList.contains("active")
         ){
 
-            Date.setDate(
-                Date.getDate() + 7
-            );
+            selectedDate.setDate(
+    selectedDate.getDate() + 7
+);
 
-            currentDate =
-                new Date(Date);
+currentDate =
+    new Date(selectedDate);
 
             renderWeekCalendar();
             renderEvents();
@@ -2673,8 +2612,8 @@ document
         currentDate =
             new Date();
 
-        Date =
-            new Date();
+        selectedDate =
+    new Date();
 
         renderCalendar();
 
@@ -3064,7 +3003,7 @@ event.endDate =
             saveEvents();
 
 
-            Date =
+            selectedDate =
     new Date(
         startDate + "T00:00:00"
     );
@@ -3170,16 +3109,16 @@ endDate:
         saveEvents();
 
 
-        Date =
-            new Date(
-                date + "T00:00:00"
-            );
+        selectedDate =
+    new Date(
+        startDate + "T00:00:00"
+    );
 
 
-        currentDate =
-            new Date(
-                date + "T00:00:00"
-            );
+currentDate =
+    new Date(
+        startDate + "T00:00:00"
+    );
 
 
         closeModal();
@@ -3851,15 +3790,15 @@ endDate:
     saveEvents();
 
 
-    Date =
+    selectedDate =
     new Date(
-        startDate + "T00:00:00"
+        date + "T00:00:00"
     );
 
 
 currentDate =
     new Date(
-        startDate + "T00:00:00"
+        date + "T00:00:00"
     );
 
 
