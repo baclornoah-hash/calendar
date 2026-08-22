@@ -1799,7 +1799,7 @@ function getEventsForDate(date){
     return events.filter(function(event){
 
         const current =
-            new Date(date + "T00:00:00");
+            new Date(Sdate + "T00:00:00");
 
         const start =
             new Date(
@@ -2285,31 +2285,25 @@ updateTimeFields();
         }
 
 
-        if(
-            action ===
-            "move"
-        ){
+        if(action === "move"){
 
-            const newDate =
-    prompt(
-        "Move event to date:\n\nYYYY-MM-DD",
-        event.startDate
-    );
+    const newDate =
+        prompt(
+            "Move event to date:\n\nYYYY-MM-DD",
+            event.startDate
+        );
 
+    if(newDate){
 
-if(newDate){
+        event.startDate = newDate;
+        event.endDate = newDate;
 
-    event.startDate =
-        newDate;
+        event.status = "moved";
 
-    event.endDate =
-        newDate;
+        event.moved =
+            (event.moved || 0) + 1;
 
-    event.status =
-        "moved";
-
-    event.moved =
-        (event.moved || 0) + 1;
+    }
 
 }
 
@@ -2589,6 +2583,11 @@ if(event.repeat === "custom"){
 
     eventForm.dataset.editingId =
         event.id;
+
+    document.getElementById("timeType").value =
+    event.timeType || "specific";
+
+updateTimeFields();
 
 }
     
@@ -3797,10 +3796,10 @@ function createSmartEvent(
             "Personal",
 
         startDate:
-    startDate,
+    date,
 
 endDate:
-    endDate,
+    date,
 
         start:
             String(startHour).padStart(2,"0") +
