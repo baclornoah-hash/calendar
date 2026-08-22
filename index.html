@@ -2357,11 +2357,29 @@ document
     "click",
     function(){
 
-        currentDate.setMonth(
-            currentDate.getMonth() - 1
-        );
+        if(
+            weekViewButton.classList.contains("active")
+        ){
 
-        renderCalendar();
+            selectedDate.setDate(
+                selectedDate.getDate() - 7
+            );
+
+            currentDate =
+                new Date(selectedDate);
+
+            renderWeekCalendar();
+            renderEvents();
+
+        }else{
+
+            currentDate.setMonth(
+                currentDate.getMonth() - 1
+            );
+
+            renderCalendar();
+
+        }
 
     }
 );
@@ -2373,11 +2391,29 @@ document
     "click",
     function(){
 
-        currentDate.setMonth(
-            currentDate.getMonth() + 1
-        );
+        if(
+            weekViewButton.classList.contains("active")
+        ){
 
-        renderCalendar();
+            selectedDate.setDate(
+                selectedDate.getDate() + 7
+            );
+
+            currentDate =
+                new Date(selectedDate);
+
+            renderWeekCalendar();
+            renderEvents();
+
+        }else{
+
+            currentDate.setMonth(
+                currentDate.getMonth() + 1
+            );
+
+            renderCalendar();
+
+        }
 
     }
 );
