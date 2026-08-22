@@ -2949,11 +2949,9 @@ modal.addEventListener(
 
 function showMonthView(){
 
-    calendar.style.display =
-        "grid";
+    calendar.style.display = "grid";
 
-    weekCalendar.style.display =
-        "none";
+    weekCalendar.style.display = "none";
 
     monthViewButton.classList.add("active");
 
@@ -2963,15 +2961,16 @@ function showMonthView(){
 
 }
 
+
 function showWeekView(){
 
-    calendar.style.display =
-        "none";
+    calendar.style.display = "none";
 
-    document.getElementById(
-        "weekCalendar"
-    ).style.display =
-        "grid";
+    weekCalendar.style.display = "grid";
+
+    monthViewButton.classList.remove("active");
+
+    weekViewButton.classList.add("active");
 
     renderWeekCalendar();
 
