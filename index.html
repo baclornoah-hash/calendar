@@ -2889,6 +2889,11 @@ eventForm.addEventListener(
                 event.title =
                     title;
 
+                event.timeType =
+    document.getElementById(
+        "timeType"
+    ).value;
+
                 event.category =
                     document.getElementById(
                         "eventCategory"
@@ -2901,6 +2906,13 @@ eventForm.addEventListener(
                     document.getElementById(
                         "eventStart"
                     ).value;
+
+                document.getElementById(
+    "timeType"
+).value =
+    event.timeType || "specific";
+
+updateTimeFields();
 
                 event.end =
                     document.getElementById(
@@ -2986,6 +2998,11 @@ eventForm.addEventListener(
 
             date:
                 date,
+
+    timeType:
+    document.getElementById(
+        "timeType"
+    ).value,
 
             start:
                 document.getElementById(
