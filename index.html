@@ -138,7 +138,7 @@ header button{
     background:#f0fbfe;
 }
 
-.day.selected{
+.day.{
     outline:3px solid var(--baby);
 }
 
@@ -677,7 +677,7 @@ textarea{
     ✨ Smart Schedule
 </button>
 
-    <h3 id="selectedTitle"></h3>
+    <h3 id="Title"></h3>
 
     <div id="eventList"></div>
 
@@ -1217,7 +1217,7 @@ let brainDump =
 
 let currentDate = new Date();
 
-let selectedDate = new Date();
+let Date = new Date();
 
 let uploadedAudio = null;
 
@@ -1411,10 +1411,10 @@ function renderCalendar(){
 
         if(
             key ===
-            getDateKey(selectedDate)
+            getDateKey(Date)
         ){
 
-            cell.classList.add("selected");
+            cell.classList.add("");
 
         }
 
@@ -1522,7 +1522,7 @@ eventElement.textContent =
             "click",
             function(){
 
-                selectedDate =
+                Date =
                     new Date(cellDate);
 
                 renderCalendar();
@@ -1572,7 +1572,7 @@ function renderWeekCalendar(){
     weekCalendar.innerHTML = "";
 
     const weekStart =
-        getStartOfWeek(selectedDate);
+        getStartOfWeek(Date);
 
 
     /* TIME COLUMN HEADER */
@@ -1767,7 +1767,7 @@ function renderWeekCalendar(){
                 "click",
                 function(){
 
-                    selectedDate =
+                    Date =
                         new Date(date);
 
                     renderCalendar();
@@ -1922,7 +1922,7 @@ function getEventsForDate(date){
                 event.customRepeat;
 
 
-            /* Check selected weekday */
+            /* Check  weekday */
 
             if(
                 !settings.days ||
@@ -2022,13 +2022,13 @@ function getEventsForDate(date){
 function renderEvents(){
 
     const key =
-        getDateKey(selectedDate);
+        getDateKey(Date);
 
 
     document.getElementById(
-        "selectedTitle"
+        "Title"
     ).textContent =
-        selectedDate.toLocaleDateString(
+        Date.toLocaleDateString(
             undefined,
             {
                 weekday:"long",
@@ -2346,13 +2346,13 @@ function openModal(){
     document.getElementById(
         "eventStartDate"
     ).value =
-        getDateKey(selectedDate);
+        getDateKey(Date);
 
 
     document.getElementById(
         "eventEndDate"
     ).value =
-        getDateKey(selectedDate);
+        getDateKey(Date);
 
 }
 
@@ -2607,12 +2607,12 @@ document
             weekViewButton.classList.contains("active")
         ){
 
-            selectedDate.setDate(
-                selectedDate.getDate() - 7
+            Date.setDate(
+                Date.getDate() - 7
             );
 
             currentDate =
-                new Date(selectedDate);
+                new Date(Date);
 
             renderWeekCalendar();
             renderEvents();
@@ -2641,12 +2641,12 @@ document
             weekViewButton.classList.contains("active")
         ){
 
-            selectedDate.setDate(
-                selectedDate.getDate() + 7
+            Date.setDate(
+                Date.getDate() + 7
             );
 
             currentDate =
-                new Date(selectedDate);
+                new Date(Date);
 
             renderWeekCalendar();
             renderEvents();
@@ -2674,7 +2674,7 @@ document
         currentDate =
             new Date();
 
-        selectedDate =
+        Date =
             new Date();
 
         renderCalendar();
@@ -2973,7 +2973,7 @@ if(endDate < startDate){
         }
 
 
-        if(!date){
+        if(!startDate){
 
             alert(
                 "Please choose a date."
@@ -3065,7 +3065,7 @@ event.endDate =
             saveEvents();
 
 
-            selectedDate =
+            Date =
     new Date(
         startDate + "T00:00:00"
     );
@@ -3113,10 +3113,10 @@ currentDate =
                 ).value,
 
             startDate:
-    date,
+    startDate,
 
 endDate:
-    date,
+    endDate,
 
     timeType:
     document.getElementById(
@@ -3171,7 +3171,7 @@ endDate:
         saveEvents();
 
 
-        selectedDate =
+        Date =
             new Date(
                 date + "T00:00:00"
             );
@@ -3359,7 +3359,7 @@ document
         smartModal.classList.add("show");
 
         smartDate.value =
-            getDateKey(selectedDate);
+            getDateKey(Date);
 
         smartTitle.focus();
 
@@ -3852,7 +3852,7 @@ endDate:
     saveEvents();
 
 
-    selectedDate =
+    Date =
     new Date(
         startDate + "T00:00:00"
     );
