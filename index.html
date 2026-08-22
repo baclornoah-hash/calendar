@@ -542,6 +542,42 @@ textarea{
 .smart-schedule:hover{
     background:#a9deed;
 }
+
+    /* SMART SCHEDULING */
+
+.smart-result{
+    background:var(--baby2);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:15px;
+    margin-top:15px;
+}
+
+.smart-result h3{
+    margin-top:0;
+}
+
+.smart-result button{
+    border:0;
+    background:var(--navy);
+    color:white;
+    padding:10px 14px;
+    border-radius:8px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.smart-result button:hover{
+    background:var(--navy2);
+}
+
+.smart-time{
+    font-size:20px;
+    font-weight:bold;
+    color:var(--navy);
+    margin:8px 0;
+}
     
 </style>
 </head>
@@ -1040,6 +1076,115 @@ textarea{
 
 </div>
 
+<!-- SMART SCHEDULE MODAL -->
+
+<div class="modal" id="smartModal">
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <h2>✨ Smart Schedule</h2>
+
+            <button class="close" id="closeSmartModal">
+                ×
+            </button>
+
+        </div>
+
+        <p style="font-size:13px;color:#627d98;">
+            Tell MindCal what you need to do, and it will find
+            an available time around your existing events.
+        </p>
+
+        <div class="form-group">
+
+            <label>What do you need to do?</label>
+
+            <input
+                id="smartTitle"
+                type="text"
+                placeholder="Example: Study for exam"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Duration</label>
+
+            <select id="smartDuration">
+
+                <option value="30">30 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="90">1 hour 30 minutes</option>
+                <option value="120">2 hours</option>
+                <option value="180">3 hours</option>
+                <option value="240">4 hours</option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Preferred Date</label>
+
+            <input
+                id="smartDate"
+                type="date">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Preferred Time</label>
+
+            <select id="smartPreference">
+
+                <option value="any">
+                    🧠 Any available time
+                </option>
+
+                <option value="morning">
+                    🌅 Morning
+                </option>
+
+                <option value="afternoon">
+                    ☀️ Afternoon
+                </option>
+
+                <option value="evening">
+                    🌆 Evening
+                </option>
+
+                <option value="night">
+                    🌙 Night
+                </option>
+
+            </select>
+
+        </div>
+
+        <button
+            class="save-event"
+            id="findSmartTime">
+
+            ✨ Find Best Time
+
+        </button>
+
+        <div
+            id="smartResult"
+            style="
+                margin-top:15px;
+                font-size:13px;
+            ">
+        </div>
+
+    </div>
+
+</div>
 
 <script>
 
@@ -3043,6 +3188,563 @@ weekViewButton.addEventListener(
     "click",
     showWeekView
 );
+
+    /* =========================================
+   SMART SCHEDULING
+========================================= */
+
+const smartModal =
+    document.getElementById("smartModal");
+
+const smartTitle =
+    document.getElementById("smartTitle");
+
+const smartDuration =
+    document.getElementById("smartDuration");
+
+const smartDate =
+    document.getElementById("smartDate");
+
+const smartPreference =
+    document.getElementById("smartPreference");
+
+const smartResult =
+    document.getElementById("smartResult");
+
+
+/* OPEN SMART SCHEDULE */
+
+document
+.getElementById("smartScheduleButton")
+.addEventListener(
+    "click",
+    function(){
+
+        smartModal.classList.add("show");
+
+        smartDate.value =
+            getDateKey(selectedDate);
+
+        smartTitle.focus();
+
+    }
+);
+
+
+/* CLOSE SMART SCHEDULE */
+
+document
+.getElementById("closeSmartModal")
+.addEventListener(
+    "click",
+    function(){
+
+        smartModal.classList.remove("show");
+
+        smartResult.innerHTML = "";
+
+    }
+);
+
+
+/* =========================================
+   FIND AVAILABLE TIME
+========================================= */
+
+function findAvailableTime(
+    date,
+    duration,
+    preference
+){
+
+    const dayEvents =
+        getEventsForDate(date);
+
+
+    const busyTimes = [];
+
+
+    /* Get existing timed events */
+
+    dayEvents.forEach(function(event){
+
+        if(!event.start){
+            return;
+        }
+
+
+        const startParts =
+            event.start.split(":");
+
+
+        const start =
+            Number(startParts[0]) * 60 +
+            Number(startParts[1]);
+
+
+        let end;
+
+
+        if(event.end){
+
+            const endParts =
+                event.end.split(":");
+
+
+            end =
+                Number(endParts[0]) * 60 +
+                Number(endParts[1]);
+
+        }else{
+
+            /* No end time = assume 1 hour */
+
+            end =
+                start + 60;
+
+        }
+
+
+        busyTimes.push({
+            start:start,
+            end:end
+        });
+
+    });
+
+
+    /* Sort events by starting time */
+
+    busyTimes.sort(function(a,b){
+
+        return a.start - b.start;
+
+    });
+
+
+    /* =====================================
+       CHOOSE TIME WINDOW
+    ===================================== */
+
+    let windowStart = 8 * 60;
+    let windowEnd = 22 * 60;
+
+
+    if(preference === "morning"){
+
+        windowStart = 6 * 60;
+        windowEnd = 12 * 60;
+
+    }
+
+
+    if(preference === "afternoon"){
+
+        windowStart = 12 * 60;
+        windowEnd = 17 * 60;
+
+    }
+
+
+    if(preference === "evening"){
+
+        windowStart = 17 * 60;
+        windowEnd = 21 * 60;
+
+    }
+
+
+    if(preference === "night"){
+
+        windowStart = 20 * 60;
+        windowEnd = 23 * 60;
+
+    }
+
+
+    /* =====================================
+       SEARCH FOR FREE TIME
+    ===================================== */
+
+    let possibleTime =
+        windowStart;
+
+
+    for(
+        let i = 0;
+        i <= busyTimes.length;
+        i++
+    ){
+
+        const nextBusy =
+            busyTimes[i];
+
+
+        const availableEnd =
+            nextBusy
+            ? nextBusy.start
+            : windowEnd;
+
+
+        /* Is there enough free time? */
+
+        if(
+            availableEnd -
+            possibleTime
+            >= duration
+        ){
+
+            return {
+
+                start:
+                    possibleTime,
+
+                end:
+                    possibleTime + duration
+
+            };
+
+        }
+
+
+        /* Move past the existing event */
+
+        if(nextBusy){
+
+            possibleTime =
+                Math.max(
+                    possibleTime,
+                    nextBusy.end
+                );
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================
+   FORMAT TIME
+========================================= */
+
+function formatTime(minutes){
+
+    let hour =
+        Math.floor(minutes / 60);
+
+    let minute =
+        minutes % 60;
+
+
+    const period =
+        hour >= 12
+        ? "PM"
+        : "AM";
+
+
+    let displayHour =
+        hour % 12;
+
+
+    if(displayHour === 0){
+
+        displayHour = 12;
+
+    }
+
+
+    return (
+        displayHour +
+        ":" +
+        String(minute).padStart(2,"0") +
+        " " +
+        period
+    );
+
+}
+
+
+/* =========================================
+   FIND BEST TIME BUTTON
+========================================= */
+
+document
+.getElementById("findSmartTime")
+.addEventListener(
+    "click",
+    function(){
+
+        const title =
+            smartTitle.value.trim();
+
+
+        const date =
+            smartDate.value;
+
+
+        const duration =
+            Number(
+                smartDuration.value
+            );
+
+
+        const preference =
+            smartPreference.value;
+
+
+        if(!title){
+
+            alert(
+                "Tell me what you need to schedule."
+            );
+
+            return;
+
+        }
+
+
+        if(!date){
+
+            alert(
+                "Please choose a date."
+            );
+
+            return;
+
+        }
+
+
+        const result =
+            findAvailableTime(
+                date,
+                duration,
+                preference
+            );
+
+
+        /* =================================
+           NO TIME FOUND
+        ================================= */
+
+        if(!result){
+
+            smartResult.innerHTML = `
+
+                <div class="smart-result">
+
+                    <h3>
+                        😕 No suitable time found
+                    </h3>
+
+                    <p>
+                        MindCal couldn't find enough
+                        free time on this day.
+                    </p>
+
+                    <p>
+                        Try another date or a
+                        shorter duration.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        /* =================================
+           SHOW SUGGESTION
+        ================================= */
+
+        smartResult.innerHTML = `
+
+            <div class="smart-result">
+
+                <h3>
+                    ✨ I found a free time!
+                </h3>
+
+                <div class="smart-time">
+
+                    ${formatTime(result.start)}
+                    –
+                    ${formatTime(result.end)}
+
+                </div>
+
+                <p>
+                    ${escapeHTML(title)}
+                </p>
+
+                <button id="acceptSmartSchedule">
+
+                    ✓ Schedule It
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        /* SCHEDULE BUTTON */
+
+        document
+        .getElementById(
+            "acceptSmartSchedule"
+        )
+        .addEventListener(
+            "click",
+            function(){
+
+                createSmartEvent(
+                    title,
+                    date,
+                    result.start,
+                    result.end
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================
+   CREATE SMART EVENT
+========================================= */
+
+function createSmartEvent(
+    title,
+    date,
+    startMinutes,
+    endMinutes
+){
+
+    const startHour =
+        Math.floor(
+            startMinutes / 60
+        );
+
+
+    const startMinute =
+        startMinutes % 60;
+
+
+    const endHour =
+        Math.floor(
+            endMinutes / 60
+        );
+
+
+    const endMinute =
+        endMinutes % 60;
+
+
+    const newEvent = {
+
+        id:
+            Date.now().toString(),
+
+        title:
+            title,
+
+        category:
+            "Personal",
+
+        date:
+            date,
+
+        start:
+            String(startHour).padStart(2,"0") +
+            ":" +
+            String(startMinute).padStart(2,"0"),
+
+        end:
+            String(endHour).padStart(2,"0") +
+            ":" +
+            String(endMinute).padStart(2,"0"),
+
+        timeType:
+            "specific",
+
+        description:
+            "Created using Smart Schedule.",
+
+        repeat:
+            "none",
+
+        customRepeat:
+            {
+                days:[],
+                endType:"never",
+                endDate:"",
+                occurrences:""
+            },
+
+        alarm:
+            "none",
+
+        audio:
+            null,
+
+        status:
+            "scheduled",
+
+        moved:
+            0
+
+    };
+
+
+    events.push(
+        newEvent
+    );
+
+
+    saveEvents();
+
+
+    selectedDate =
+        new Date(
+            date + "T00:00:00"
+        );
+
+
+    currentDate =
+        new Date(
+            date + "T00:00:00"
+        );
+
+
+    smartModal.classList.remove(
+        "show"
+    );
+
+
+    smartResult.innerHTML = "";
+
+
+    renderCalendar();
+
+    renderEvents();
+
+    renderWeekCalendar();
+
+
+    alert(
+        "Smart event scheduled! ✨"
+    );
+
+}
     
 /* =========================================
    INITIAL LOAD
@@ -3052,6 +3754,428 @@ renderCalendar();
 
 renderEvents();
 
+    //* =========================================
+   SMART SCHEDULING — CHECK FREE TIME
+========================================= */
+
+function findSmartTime(){
+
+    const now = new Date();
+
+    /* Check the next 7 days */
+
+    for(let dayOffset = 0; dayOffset < 7; dayOffset++){
+
+        const date = new Date(now);
+
+        date.setDate(
+            now.getDate() + dayOffset
+        );
+
+        const dateKey =
+            getDateKey(date);
+
+
+        /* Avoid scheduling in the past */
+
+        let startHour = 9;
+
+        if(dayOffset === 0){
+
+            startHour =
+                Math.max(
+                    9,
+                    now.getHours() + 1
+                );
+
+        }
+
+
+        /* Check 9 AM → 8 PM */
+
+        for(
+            let hour = startHour;
+            hour < 20;
+            hour++
+        ){
+
+            const startMinutes =
+                hour * 60;
+
+            const endMinutes =
+                startMinutes + 60;
+
+
+            const conflict =
+                getEventsForDate(dateKey)
+                .some(function(event){
+
+                    if(!event.start){
+                        return false;
+                    }
+
+
+                    const eventStart =
+                        timeToMinutes(
+                            event.start
+                        );
+
+
+                    const eventEnd =
+                        event.end
+                        ? timeToMinutes(event.end)
+                        : eventStart + 60;
+
+
+                    return (
+                        startMinutes < eventEnd &&
+                        endMinutes > eventStart
+                    );
+
+                });
+
+
+            if(!conflict){
+
+                return {
+
+                    date: dateKey,
+
+                    start:
+                        minutesToTime(
+                            startMinutes
+                        ),
+
+                    end:
+                        minutesToTime(
+                            endMinutes
+                        )
+
+                };
+
+            }
+
+        }
+
+    }
+
+
+    return null;
+
+}
+
+
+/* =========================================
+   TIME CONVERSION
+========================================= */
+
+function timeToMinutes(time){
+
+    const parts =
+        time.split(":");
+
+    return (
+        Number(parts[0]) * 60 +
+        Number(parts[1])
+    );
+
+}
+
+
+function minutesToTime(minutes){
+
+    const hours =
+        Math.floor(
+            minutes / 60
+        );
+
+    const mins =
+        minutes % 60;
+
+
+    return (
+        String(hours).padStart(2,"0")
+        + ":" +
+        String(mins).padStart(2,"0")
+    );
+
+}
+
+
+/* =========================================
+   SMART SCHEDULE BUTTON
+========================================= */
+
+document
+.getElementById("smartScheduleButton")
+.addEventListener(
+    "click",
+    function(){
+
+        const flexibleEvents =
+            events.filter(function(event){
+
+                return (
+                    event.timeType === "flexible" &&
+                    event.status !== "completed" &&
+                    event.status !== "cancelled"
+                );
+
+            });
+
+
+        if(
+            flexibleEvents.length === 0
+        ){
+
+            alert(
+                "🧠 You don't have any flexible events to schedule."
+            );
+
+            return;
+
+        }
+
+
+        const event =
+            flexibleEvents[0];
+
+
+        const suggestion =
+            findSmartTime();
+
+
+        if(!suggestion){
+
+            alert(
+                "I couldn't find a free 1-hour slot in the next 7 days."
+            );
+
+            return;
+
+        }
+
+
+        /* Apply suggestion */
+
+        event.date =
+            suggestion.date;
+
+        event.start =
+            suggestion.start;
+
+        event.end =
+            suggestion.end;
+
+        event.timeType =
+            "specific";
+
+        event.status =
+            "scheduled";
+
+
+        saveEvents();
+
+
+        /* Move calendar to suggested date */
+
+        selectedDate =
+            new Date(
+                suggestion.date +
+                "T00:00:00"
+            );
+
+
+        currentDate =
+            new Date(
+                suggestion.date +
+                "T00:00:00"
+            );
+
+
+        renderCalendar();
+
+        renderEvents();
+
+        renderWeekCalendar();
+
+
+        /* Show result */
+
+        const displayDate =
+            new Date(
+                suggestion.date +
+                "T00:00:00"
+            );
+
+
+        alert(
+            `✨ Smart Schedule found a free time!\n\n` +
+
+            `${event.title}\n` +
+
+            `${displayDate.toLocaleDateString(
+                undefined,
+                {
+                    weekday:"long",
+                    month:"long",
+                    day:"numeric",
+                    year:"numeric"
+                }
+            )}\n` +
+
+            `${formatTime(
+                suggestion.start
+            )} – ${formatTime(
+                suggestion.end
+            )}`
+        );
+
+    }
+);
+
+
+/* =========================================
+   FORMAT TIME
+========================================= */
+
+function formatTime(time){
+
+    const parts =
+        time.split(":");
+
+    let hour =
+        Number(parts[0]);
+
+    const minutes =
+        parts[1];
+
+    const period =
+        hour >= 12
+        ? "PM"
+        : "AM";
+
+
+    if(hour === 0){
+        hour = 12;
+    }
+
+    else if(hour > 12){
+        hour -= 12;
+    }
+
+
+    return `${hour}:${minutes} ${period}`;
+
+} =========================================
+   SMART SCHEDULING
+========================================= */
+
+document
+.getElementById("smartScheduleButton")
+.addEventListener(
+    "click",
+    function(){
+
+        const flexibleEvents =
+            events.filter(function(event){
+
+                return (
+                    event.timeType === "flexible" &&
+                    event.status !== "completed" &&
+                    event.status !== "cancelled"
+                );
+
+            });
+
+
+        if(flexibleEvents.length === 0){
+
+            alert(
+                "No flexible events need scheduling right now. 🧠"
+            );
+
+            return;
+
+        }
+
+
+        const event =
+            flexibleEvents[0];
+
+
+        /* Find a suitable time */
+
+        const suggestedDate =
+            new Date();
+
+
+        suggestedDate.setDate(
+            suggestedDate.getDate() + 1
+        );
+
+
+        const dateKey =
+            getDateKey(suggestedDate);
+
+
+        /* Suggested working time */
+
+        event.date =
+            dateKey;
+
+        event.start =
+            "10:00";
+
+        event.end =
+            "11:00";
+
+        event.timeType =
+            "specific";
+
+
+        event.status =
+            "scheduled";
+
+
+        saveEvents();
+
+
+        selectedDate =
+            new Date(
+                dateKey + "T00:00:00"
+            );
+
+
+        currentDate =
+            new Date(
+                dateKey + "T00:00:00"
+            );
+
+
+        renderCalendar();
+
+        renderEvents();
+
+        renderWeekCalendar();
+
+
+        alert(
+            `✨ Smart Schedule suggested:\n\n` +
+            `${event.title}\n` +
+            `${suggestedDate.toLocaleDateString(
+                undefined,
+                {
+                    weekday:"long",
+                    month:"long",
+                    day:"numeric"
+                }
+            )}\n` +
+            `10:00 AM – 11:00 AM`
+        );
+
+    });
+    
 </script>
 
 </body>
