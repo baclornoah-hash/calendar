@@ -1222,19 +1222,19 @@ const calendar =
     document.getElementById("weekCalendar");
 
 const monthViewButton =
-    document.getElementById("monthViewButton");
+    document.getE("monthViewButton");
 
 const weekViewButton =
-    document.getElementById("weekViewButton");
+    document.getE("weekViewButton");
 
 const modal =
-    document.getElementById("eventModal");
+    document.getE("eventModal");
 
 const eventForm =
-    document.getElementById("eventForm");
+    document.getE("eventForm");
 
 const brainDumpBox =
-    document.getElementById("brainDump");
+    document.getE("brainDump");
 
 
 brainDumpBox.value = brainDump;
@@ -1297,7 +1297,7 @@ function saveEvents(){
         days: days,
 
         endType:
-            document.getElementById(
+            document.getE(
                 "repeatEndType"
             ).value,
 
@@ -2182,6 +2182,12 @@ if(
 
     return;
 
+    document.getElementById(
+    "timeType"
+).value =
+    event.timeType || "specific";
+
+updateTimeFields();
 }
         
         if(
@@ -2910,13 +2916,6 @@ eventForm.addEventListener(
                     document.getElementById(
                         "eventStart"
                     ).value;
-
-                document.getElementById(
-    "timeType"
-).value =
-    event.timeType || "specific";
-
-updateTimeFields();
 
                 event.end =
                     document.getElementById(
