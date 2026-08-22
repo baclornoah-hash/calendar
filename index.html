@@ -18,6 +18,9 @@
     --border:#d7e8ef;
     --green:#4caf7a;
     --red:#d9534f;
+    --priority-must:#e5484d;
+    --priority-could:#f2b705;
+    --priority-none:#c4d1dc;
 }
 
 *{
@@ -168,6 +171,18 @@ header button{
     opacity:.35;
 }
 
+.event.priority-must{
+    border-left:3px solid var(--priority-must);
+}
+
+.event.priority-could{
+    border-left:3px solid var(--priority-could);
+}
+
+.event.priority-none{
+    border-left:3px solid var(--priority-none);
+}
+
 /* ADD BUTTON */
 
 .add-event{
@@ -191,9 +206,32 @@ header button{
 .event-card{
     background:#f6fbfd;
     border:1px solid var(--border);
+    border-left:4px solid var(--priority-none);
     padding:12px;
     border-radius:11px;
     margin-bottom:10px;
+}
+
+.event-card.priority-must{
+    border-left-color:var(--priority-must);
+}
+
+.event-card.priority-could{
+    border-left-color:var(--priority-could);
+}
+
+.event-card.priority-none{
+    border-left-color:var(--priority-none);
+}
+
+.priority-badge{
+    display:inline-block;
+    font-size:11px;
+    font-weight:bold;
+    padding:2px 8px;
+    border-radius:20px;
+    background:var(--baby2);
+    margin-bottom:6px;
 }
 
 .event-card h4{
@@ -518,6 +556,18 @@ textarea{
     opacity:.35;
 }
 
+.week-event.priority-must{
+    border-left:3px solid var(--priority-must);
+}
+
+.week-event.priority-could{
+    border-left:3px solid var(--priority-could);
+}
+
+.week-event.priority-none{
+    border-left:3px solid var(--priority-none);
+}
+
     .smart-schedule{
     width:100%;
     padding:14px;
@@ -757,6 +807,29 @@ textarea{
                     <option>Chores</option>
                     <option>Health</option>
                     <option>Other</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Priority</label>
+
+                <select id="eventPriority">
+
+                    <option value="must">
+                        🔴 Must Get Done
+                    </option>
+
+                    <option value="could">
+                        🟡 Could Get Done Today
+                    </option>
+
+                    <option value="none" selected>
+                        ⚪ Everything Else
+                    </option>
 
                 </select>
 
@@ -1130,6 +1203,28 @@ textarea{
 
         <div class="form-group">
 
+            <label>Priority</label>
+
+            <select id="smartPriority">
+
+                <option value="must">
+                    🔴 Must Get Done
+                </option>
+
+                <option value="could">
+                    🟡 Could Get Done Today
+                </option>
+
+                <option value="none" selected>
+                    ⚪ Everything Else
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
             <label>Preferred Date</label>
 
             <input
@@ -1430,6 +1525,10 @@ function renderCalendar(){
         const dayEvents =
             getEventsForDate(key);
 
+        dayEvents.sort(function(a,b){
+            return getPriorityRank(a) - getPriorityRank(b);
+        });
+
 
         dayEvents
         .slice(0,4)
@@ -1440,7 +1539,8 @@ function renderCalendar(){
 
 
             eventElement.className =
-                "event";
+                "event priority-" +
+                (event.priority || "none");
 
 
             if(
@@ -1713,7 +1813,8 @@ function renderWeekCalendar(){
                         );
 
                     eventElement.className =
-                        "week-event";
+                        "week-event priority-" +
+                        (event.priority || "none");
 
 
                     if(
@@ -1992,6 +2093,40 @@ function getEventsForDate(date){
    RENDER EVENT LIST
 ========================================= */
 
+/* =========================================
+   PRIORITY HELPERS
+========================================= */
+
+function getPriorityRank(event){
+
+    if(event.priority === "must"){
+        return 0;
+    }
+
+    if(event.priority === "could"){
+        return 1;
+    }
+
+    return 2;
+
+}
+
+
+function getPriorityLabel(priority){
+
+    if(priority === "must"){
+        return "🔴 Must Get Done";
+    }
+
+    if(priority === "could"){
+        return "🟡 Could Get Done Today";
+    }
+
+    return "⚪ Everything Else";
+
+}
+
+
 function renderEvents(){
 
     const key =
@@ -2024,6 +2159,18 @@ function renderEvents(){
         getEventsForDate(key);
 
 
+    /* Automatic prioritization: Must Get Done
+       first, then Could Get Done, then
+       everything else. Ties keep their
+       original relative order. */
+
+    dayEvents.sort(function(a,b){
+
+        return getPriorityRank(a) - getPriorityRank(b);
+
+    });
+
+
     if(
         dayEvents.length === 0
     ){
@@ -2048,7 +2195,8 @@ function renderEvents(){
 
 
             card.className =
-                "event-card";
+                "event-card priority-" +
+                (event.priority || "none");
 
 
             let time = "";
@@ -2069,6 +2217,10 @@ function renderEvents(){
 
 
             card.innerHTML = `
+
+                <div class="priority-badge">
+                    ${getPriorityLabel(event.priority)}
+                </div>
 
                 <h4>
                     ${escapeHTML(event.title)}
@@ -2424,6 +2576,12 @@ function openEditModal(event){
         "eventCategory"
     ).value =
         event.category || "Personal";
+
+
+    document.getElementById(
+        "eventPriority"
+    ).value =
+        event.priority || "none";
 
 
     document.getElementById(
@@ -2976,6 +3134,11 @@ if(endDate < startDate){
                         "eventCategory"
                     ).value;
 
+                event.priority =
+                    document.getElementById(
+                        "eventPriority"
+                    ).value;
+
                 event.startDate =
     startDate;
 
@@ -3068,6 +3231,11 @@ currentDate =
             category:
                 document.getElementById(
                     "eventCategory"
+                ).value,
+
+            priority:
+                document.getElementById(
+                    "eventPriority"
                 ).value,
 
             startDate:
@@ -3704,7 +3872,8 @@ document
                     title,
                     date,
                     result.start,
-                    result.end
+                    result.end,
+                    smartPriority.value
                 );
 
             }
@@ -3722,7 +3891,8 @@ function createSmartEvent(
     title,
     date,
     startMinutes,
-    endMinutes
+    endMinutes,
+    priority
 ){
 
     const startHour =
@@ -3755,6 +3925,9 @@ function createSmartEvent(
 
         category:
             "Personal",
+
+        priority:
+            priority || "none",
 
         startDate:
     date,
@@ -3857,4 +4030,3 @@ renderEvents();
 
 </body>
 </html>
-    
