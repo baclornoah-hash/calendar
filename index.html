@@ -568,6 +568,48 @@ textarea{
     border-left:3px solid var(--priority-none);
 }
 
+/* DEDICATED (NON-HOURLY) WEEK SECTIONS */
+
+.week-section-cell{
+    min-height:34px;
+    border-right:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+    padding:4px;
+    cursor:pointer;
+    background:white;
+}
+
+.week-section-cell:hover{
+    background:var(--baby2);
+}
+
+.week-section-group{
+    margin-bottom:4px;
+}
+
+.week-section-group:last-child{
+    margin-bottom:0;
+}
+
+.week-section-label{
+    font-size:9px;
+    font-weight:bold;
+    color:var(--gray);
+    text-transform:uppercase;
+    letter-spacing:.3px;
+    margin-bottom:2px;
+}
+
+.week-timed-divider{
+    grid-column:1 / -1;
+    background:var(--navy);
+    color:white;
+    font-size:12px;
+    font-weight:bold;
+    padding:8px 10px;
+    letter-spacing:.3px;
+}
+
     .smart-schedule{
     width:100%;
     padding:14px;
@@ -1718,6 +1760,209 @@ function renderWeekCalendar(){
     }
 
 
+    /* =====================================
+       DEDICATED SECTIONS
+       (All Day, Anytime, Morning,
+       Afternoon, Evening, Night)
+    ===================================== */
+
+    const sectionGroups = [
+
+        { key:"morning",  label:"🌅 Morning" },
+        { key:"afternoon",label:"☀️ Afternoon" },
+        { key:"evening",  label:"🌆 Evening" },
+        { key:"night",    label:"🌙 Night" },
+        { key:"flexible", label:"🧠 Anytime" },
+        { key:"all-day",  label:"📅 All Day" }
+
+    ];
+
+
+    const sectionLabel =
+        document.createElement("div");
+
+    sectionLabel.className =
+        "week-time";
+
+    sectionLabel.textContent =
+        "";
+
+    weekCalendar.appendChild(
+        sectionLabel
+    );
+
+
+    for(let day = 0; day < 7; day++){
+
+        const date =
+            new Date(weekStart);
+
+        date.setDate(
+            weekStart.getDate() + day
+        );
+
+
+        const dateKey =
+            getDateKey(date);
+
+
+        const dayEvents =
+            getEventsForDate(dateKey);
+
+
+        const sectionCell =
+            document.createElement("div");
+
+        sectionCell.className =
+            "week-section-cell";
+
+
+        sectionGroups.forEach(
+            function(group){
+
+                const groupEvents =
+                    dayEvents.filter(
+                        function(event){
+
+                            return event.timeType ===
+                                group.key;
+
+                        }
+                    );
+
+
+                if(groupEvents.length === 0){
+
+                    return;
+
+                }
+
+
+                groupEvents.sort(
+                    function(a,b){
+
+                        return getPriorityRank(a) -
+                            getPriorityRank(b);
+
+                    }
+                );
+
+
+                const groupBox =
+                    document.createElement("div");
+
+                groupBox.className =
+                    "week-section-group";
+
+
+                const groupLabel =
+                    document.createElement("div");
+
+                groupLabel.className =
+                    "week-section-label";
+
+                groupLabel.textContent =
+                    group.label;
+
+                groupBox.appendChild(
+                    groupLabel
+                );
+
+
+                groupEvents.forEach(
+                    function(event){
+
+                        const item =
+                            document.createElement("div");
+
+                        item.className =
+                            "week-event priority-" +
+                            (event.priority || "none");
+
+
+                        if(
+                            event.status ===
+                            "completed"
+                        ){
+
+                            item.classList.add(
+                                "completed"
+                            );
+
+                        }
+
+
+                        if(
+                            event.status ===
+                            "cancelled"
+                        ){
+
+                            item.classList.add(
+                                "cancelled"
+                            );
+
+                        }
+
+
+                        item.textContent =
+                            event.title;
+
+                        groupBox.appendChild(
+                            item
+                        );
+
+                    }
+                );
+
+
+                sectionCell.appendChild(
+                    groupBox
+                );
+
+            }
+        );
+
+
+        sectionCell.addEventListener(
+            "click",
+            function(){
+
+                selectedDate =
+                    new Date(date);
+
+                renderCalendar();
+
+                renderEvents();
+
+                renderWeekCalendar();
+
+            }
+        );
+
+
+        weekCalendar.appendChild(
+            sectionCell
+        );
+
+    }
+
+
+    /* TIMED EVENTS DIVIDER */
+
+    const timedDivider =
+        document.createElement("div");
+
+    timedDivider.className =
+        "week-timed-divider";
+
+    timedDivider.textContent =
+        "🕐 Timed Events";
+
+    weekCalendar.appendChild(
+        timedDivider
+    );
+
+
     /* HOURS */
 
     for(let hour = 0; hour < 24; hour++){
@@ -1782,11 +2027,18 @@ function renderWeekCalendar(){
                 function(event){
 
                     /*
-                       Only show timed events
-                       in their matching hour.
+                       Only show specific-time
+                       events in the hourly grid —
+                       Morning/Afternoon/Evening/
+                       Night/Anytime/All Day events
+                       live in their own dedicated
+                       sections above.
                     */
 
-                    if(!event.start){
+                    if(
+                        event.timeType !== "specific" ||
+                        !event.start
+                    ){
 
                         return;
 
