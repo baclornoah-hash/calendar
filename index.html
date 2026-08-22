@@ -610,6 +610,15 @@ textarea{
     letter-spacing:.3px;
 }
 
+/* DAILY VIEW */
+
+.day-calendar{
+    display:grid;
+    grid-template-columns:90px 1fr;
+    border:1px solid var(--border);
+    overflow-x:auto;
+}
+
     .smart-schedule{
     width:100%;
     padding:14px;
@@ -722,10 +731,14 @@ textarea{
         Week
     </button>
 
+    <button id="dayViewButton" class="view-button">
+        Day
+    </button>
+
 </div>
 
 
-    <div class="weekdays">
+    <div class="weekdays" id="weekdaysRow">
 
         <div class="weekday">Sun</div>
         <div class="weekday">Mon</div>
@@ -741,6 +754,8 @@ textarea{
     <div id="calendar" class="calendar"></div>
 
     <div id="weekCalendar" class="week-calendar" style="display:none;"></div>
+
+    <div id="dayCalendar" class="day-calendar" style="display:none;"></div>
 
 </div>
 
@@ -1360,11 +1375,20 @@ const calendar =
 const weekCalendar =
     document.getElementById("weekCalendar");
 
+const dayCalendar =
+    document.getElementById("dayCalendar");
+
+const weekdaysRow =
+    document.getElementById("weekdaysRow");
+
 const monthViewButton =
     document.getElementById("monthViewButton");
 
 const weekViewButton =
     document.getElementById("weekViewButton");
+
+const dayViewButton =
+    document.getElementById("dayViewButton");
 
 const modal =
     document.getElementById("eventModal");
@@ -1663,6 +1687,7 @@ eventElement.textContent =
 renderEvents();
 
 renderWeekCalendar();
+renderDayCalendar();
 
             }
         );
@@ -1935,6 +1960,7 @@ function renderWeekCalendar(){
                 renderEvents();
 
                 renderWeekCalendar();
+                renderDayCalendar();
 
             }
         );
@@ -2119,6 +2145,7 @@ function renderWeekCalendar(){
                     renderEvents();
 
                     renderWeekCalendar();
+                    renderDayCalendar();
 
                 }
             );
@@ -2129,6 +2156,358 @@ function renderWeekCalendar(){
             );
 
         }
+
+    }
+
+}
+
+/* =========================================
+   RENDER DAILY VIEW
+========================================= */
+
+function renderDayCalendar(){
+
+    const dayCalendar =
+        document.getElementById("dayCalendar");
+
+    dayCalendar.innerHTML = "";
+
+    const dateKey =
+        getDateKey(selectedDate);
+
+    const dayEvents =
+        getEventsForDate(dateKey);
+
+
+    /* HEADER ROW */
+
+    const emptyHeader =
+        document.createElement("div");
+
+    emptyHeader.className =
+        "week-day-header";
+
+    emptyHeader.textContent =
+        "";
+
+    dayCalendar.appendChild(
+        emptyHeader
+    );
+
+
+    const header =
+        document.createElement("div");
+
+    header.className =
+        "week-day-header";
+
+    header.textContent =
+        selectedDate.toLocaleDateString(
+            undefined,
+            {
+                weekday:"long",
+                month:"long",
+                day:"numeric"
+            }
+        );
+
+    dayCalendar.appendChild(
+        header
+    );
+
+
+    /* =====================================
+       DEDICATED SECTIONS
+       (Morning, Afternoon, Evening,
+       Night, Anytime, All Day)
+    ===================================== */
+
+    const sectionGroups = [
+
+        { key:"morning",  label:"🌅 Morning" },
+        { key:"afternoon",label:"☀️ Afternoon" },
+        { key:"evening",  label:"🌆 Evening" },
+        { key:"night",    label:"🌙 Night" },
+        { key:"flexible", label:"🧠 Anytime" },
+        { key:"all-day",  label:"📅 All Day" }
+
+    ];
+
+
+    const sectionLabel =
+        document.createElement("div");
+
+    sectionLabel.className =
+        "week-time";
+
+    sectionLabel.textContent =
+        "";
+
+    dayCalendar.appendChild(
+        sectionLabel
+    );
+
+
+    const sectionCell =
+        document.createElement("div");
+
+    sectionCell.className =
+        "week-section-cell";
+
+
+    sectionGroups.forEach(
+        function(group){
+
+            const groupEvents =
+                dayEvents.filter(
+                    function(event){
+
+                        return event.timeType ===
+                            group.key;
+
+                    }
+                );
+
+
+            if(groupEvents.length === 0){
+
+                return;
+
+            }
+
+
+            groupEvents.sort(
+                function(a,b){
+
+                    return getPriorityRank(a) -
+                        getPriorityRank(b);
+
+                }
+            );
+
+
+            const groupBox =
+                document.createElement("div");
+
+            groupBox.className =
+                "week-section-group";
+
+
+            const groupLabel =
+                document.createElement("div");
+
+            groupLabel.className =
+                "week-section-label";
+
+            groupLabel.textContent =
+                group.label;
+
+            groupBox.appendChild(
+                groupLabel
+            );
+
+
+            groupEvents.forEach(
+                function(event){
+
+                    const item =
+                        document.createElement("div");
+
+                    item.className =
+                        "week-event priority-" +
+                        (event.priority || "none");
+
+
+                    if(
+                        event.status ===
+                        "completed"
+                    ){
+
+                        item.classList.add(
+                            "completed"
+                        );
+
+                    }
+
+
+                    if(
+                        event.status ===
+                        "cancelled"
+                    ){
+
+                        item.classList.add(
+                            "cancelled"
+                        );
+
+                    }
+
+
+                    item.textContent =
+                        event.title;
+
+                    groupBox.appendChild(
+                        item
+                    );
+
+                }
+            );
+
+
+            sectionCell.appendChild(
+                groupBox
+            );
+
+        }
+    );
+
+
+    dayCalendar.appendChild(
+        sectionCell
+    );
+
+
+    /* TIMED EVENTS DIVIDER */
+
+    const timedDivider =
+        document.createElement("div");
+
+    timedDivider.className =
+        "week-timed-divider";
+
+    timedDivider.textContent =
+        "🕐 Timed Events";
+
+    dayCalendar.appendChild(
+        timedDivider
+    );
+
+
+    /* HOURS */
+
+    for(let hour = 0; hour < 24; hour++){
+
+        const time =
+            document.createElement("div");
+
+        time.className =
+            "week-time";
+
+        const displayHour =
+            hour === 0
+                ? 12
+                : hour > 12
+                    ? hour - 12
+                    : hour;
+
+        const period =
+            hour < 12 ? "AM" : "PM";
+
+        time.textContent =
+            `${displayHour} ${period}`;
+
+        dayCalendar.appendChild(
+            time
+        );
+
+
+        const cell =
+            document.createElement("div");
+
+        cell.className =
+            "week-cell";
+
+
+        dayEvents.forEach(
+            function(event){
+
+                /*
+                   Only show specific-time
+                   events in the hourly grid.
+                */
+
+                if(
+                    event.timeType !== "specific" ||
+                    !event.start
+                ){
+
+                    return;
+
+                }
+
+
+                const eventHour =
+                    Number(
+                        event.start
+                            .split(":")[0]
+                    );
+
+
+                if(eventHour !== hour){
+
+                    return;
+
+                }
+
+
+                const eventElement =
+                    document.createElement("div");
+
+                eventElement.className =
+                    "week-event priority-" +
+                    (event.priority || "none");
+
+
+                if(
+                    event.status ===
+                    "completed"
+                ){
+
+                    eventElement.classList.add(
+                        "completed"
+                    );
+
+                }
+
+
+                if(
+                    event.status ===
+                    "cancelled"
+                ){
+
+                    eventElement.classList.add(
+                        "cancelled"
+                    );
+
+                }
+
+
+                let label =
+                    event.start;
+
+                if(event.end){
+
+                    label +=
+                        " – " +
+                        event.end;
+
+                }
+
+                eventElement.textContent =
+                    label +
+                    " " +
+                    event.title;
+
+                cell.appendChild(
+                    eventElement
+                );
+
+            }
+        );
+
+
+        dayCalendar.appendChild(
+            cell
+        );
 
     }
 
@@ -2677,6 +3056,7 @@ document
         renderEvents();
 
         renderWeekCalendar();
+        renderDayCalendar();
 
     }
 );
@@ -2992,6 +3372,21 @@ document
                 new Date(selectedDate);
 
             renderWeekCalendar();
+            renderDayCalendar();
+            renderEvents();
+
+        }else if(
+            dayViewButton.classList.contains("active")
+        ){
+
+            selectedDate.setDate(
+                selectedDate.getDate() - 1
+            );
+
+            currentDate =
+                new Date(selectedDate);
+
+            renderDayCalendar();
             renderEvents();
 
         }else{
@@ -3026,6 +3421,21 @@ currentDate =
     new Date(selectedDate);
 
             renderWeekCalendar();
+            renderDayCalendar();
+            renderEvents();
+
+        }else if(
+            dayViewButton.classList.contains("active")
+        ){
+
+            selectedDate.setDate(
+                selectedDate.getDate() + 1
+            );
+
+            currentDate =
+                new Date(selectedDate);
+
+            renderDayCalendar();
             renderEvents();
 
         }else{
@@ -3059,6 +3469,7 @@ document
 renderEvents();
 
 renderWeekCalendar();
+renderDayCalendar();
 
     }
 );
@@ -3456,6 +3867,7 @@ currentDate =
             renderEvents();
 
             renderWeekCalendar();
+            renderDayCalendar();
 
 
             alert(
@@ -3569,6 +3981,7 @@ currentDate =
         renderEvents();
 
         renderWeekCalendar();
+        renderDayCalendar();
 
 
         alert(
@@ -3670,9 +4083,15 @@ function showMonthView(){
 
     weekCalendar.style.display = "none";
 
+    dayCalendar.style.display = "none";
+
+    weekdaysRow.style.display = "grid";
+
     monthViewButton.classList.add("active");
 
     weekViewButton.classList.remove("active");
+
+    dayViewButton.classList.remove("active");
 
     renderCalendar();
 
@@ -3685,11 +4104,39 @@ function showWeekView(){
 
     weekCalendar.style.display = "grid";
 
+    dayCalendar.style.display = "none";
+
+    weekdaysRow.style.display = "none";
+
     monthViewButton.classList.remove("active");
 
     weekViewButton.classList.add("active");
 
+    dayViewButton.classList.remove("active");
+
     renderWeekCalendar();
+    renderDayCalendar();
+
+}
+
+
+function showDayView(){
+
+    calendar.style.display = "none";
+
+    weekCalendar.style.display = "none";
+
+    dayCalendar.style.display = "grid";
+
+    weekdaysRow.style.display = "none";
+
+    monthViewButton.classList.remove("active");
+
+    weekViewButton.classList.remove("active");
+
+    dayViewButton.classList.add("active");
+
+    renderDayCalendar();
 
 }
 
@@ -3703,6 +4150,12 @@ monthViewButton.addEventListener(
 weekViewButton.addEventListener(
     "click",
     showWeekView
+);
+
+
+dayViewButton.addEventListener(
+    "click",
+    showDayView
 );
 
 /* =========================================
@@ -4262,6 +4715,7 @@ currentDate =
     renderEvents();
 
     renderWeekCalendar();
+    renderDayCalendar();
 
 
     alert(
