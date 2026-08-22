@@ -774,12 +774,23 @@ textarea{
 
             <div class="form-group">
 
-                <label>Date</label>
+                <label>Start Date</label>
 
-                <input
-                    id="eventDate"
-                    type="date"
-                    required>
+<input
+    id="eventStartDate"
+    type="date"
+    required>
+
+       <div class="form-group">
+
+    <label>End Date</label>
+
+    <input
+        id="eventEndDate"
+        type="date"
+        required>
+
+</div>         
 
             </div>
 
@@ -1788,15 +1799,19 @@ function getEventsForDate(date){
     return events.filter(function(event){
 
         const current = new Date(date + "T00:00:00");
-        const start = new Date(event.date + "T00:00:00");
+const start = new Date(event.startDate + "T00:00:00");
+const end = new Date((event.endDate || event.startDate) + "T00:00:00");
 
         /* =========================
            ORIGINAL EVENT DATE
         ========================= */
 
-        if(event.date === date){
-            return true;
-        }
+        if(
+    date >= event.startDate &&
+    date <= (event.endDate || event.startDate)
+){
+    return true;
+}
 
 
         /* =========================
@@ -2283,9 +2298,14 @@ function openModal(){
 
 
     document.getElementById(
-        "eventDate"
-    ).value =
-        getDateKey(selectedDate);
+    "eventStartDate"
+).value =
+    getDateKey(selectedDate);
+
+document.getElementById(
+    "eventEndDate"
+).value =
+    getDateKey(selectedDate);
 
 }
 
