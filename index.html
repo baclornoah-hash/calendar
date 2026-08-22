@@ -432,10 +432,6 @@ textarea{
     width:auto;
 }
 
-  .day-option input{
-    width:auto;
-}
-
 
 /* WEEK VIEW */
 
@@ -458,10 +454,6 @@ textarea{
 .view-button.active{
     background:var(--navy);
     color:white;
-}
-
-.week-calendar{
-    display:none;
 }
 
     /* WEEKLY CALENDAR */
@@ -656,7 +648,7 @@ textarea{
 
     <div id="calendar" class="calendar"></div>
 
-    <div id="weekCalendar" class="week-calendar"></div>
+    <div id="weekCalendar" class="week-calendar" style="display:none;"></div>
 
 </div>
 
@@ -1216,7 +1208,7 @@ let brainDump =
 
 let currentDate = new Date();
 
-    let selectedDate = new Date();
+let selectedDate = new Date();
 
 let uploadedAudio = null;
 
@@ -1228,7 +1220,7 @@ let uploadedAudio = null;
 const calendar =
     document.getElementById("calendar");
 
-    const weekCalendar =
+const weekCalendar =
     document.getElementById("weekCalendar");
 
 const monthViewButton =
@@ -1244,7 +1236,7 @@ const eventForm =
     document.getElementById("eventForm");
     
 const brainDumpBox =
-    document.getE("brainDump");
+    document.getElementById("brainDump");
 
 
 brainDumpBox.value = brainDump;
@@ -1287,7 +1279,7 @@ function saveEvents(){
 
 }
 
-    function getCustomRepeatSettings(){
+function getCustomRepeatSettings(){
 
     const days = [];
 
@@ -1307,7 +1299,7 @@ function saveEvents(){
         days: days,
 
         endType:
-            document.getE(
+            document.getElementById(
                 "repeatEndType"
             ).value,
 
@@ -1344,7 +1336,7 @@ function renderCalendar(){
     document.getElementById(
         "monthTitle"
     ).textContent =
-        currentselectedDate.toLocaleDateString(
+        currentDate.toLocaleDateString(
             undefined,
             {
                 month:"long",
@@ -1540,7 +1532,7 @@ renderWeekCalendar();
 
 }
 
-    /* =========================================
+/* =========================================
    RENDER WEEKLY CALENDAR
 ========================================= */
 
@@ -1571,7 +1563,7 @@ function renderWeekCalendar(){
     weekCalendar.innerHTML = "";
 
     const weekStart =
-        getStartOfWeek(Date);
+        getStartOfWeek(selectedDate);
 
 
     /* TIME COLUMN HEADER */
@@ -1845,24 +1837,6 @@ function getEventsForDate(date){
 
             return false;
 
-        }
-
-
-        /* =========================
-           NO REPEAT
-        ========================= */
-
-        if(event.repeat === "none"){
-            return false;
-        }
-
-
-        /* =========================
-           BEFORE START DATE
-        ========================= */
-
-        if(current < start){
-            return false;
         }
 
 
@@ -2221,14 +2195,14 @@ document
 
         if(!event) return;
 
-if(action === "edit"){
+        if(action === "edit"){
 
-    openEditModal(event);
+            openEditModal(event);
 
-    return;
+            return;
 
-}
-        
+        }
+
         if(
             action ===
             "complete"
@@ -2276,16 +2250,20 @@ if(action === "edit"){
 
         if(action === "move"){
 
-    const newDate =
-        prompt(
-            "Move event to date:\n\nYYYY-MM-DD",
-            event.startDate
-        );
+            const newDate =
+                prompt(
+                    "Move event to date:\n\nYYYY-MM-DD",
+                    event.startDate
+                );
 
-    if(newDate){
+            if(newDate){
 
-        event.startDate = newDate;
-        event.endDate = newDate;
+                event.startDate = newDate;
+                event.endDate = newDate;
+
+            }
+
+        }
 
 
         saveEvents();
@@ -2293,6 +2271,8 @@ if(action === "edit"){
         renderCalendar();
 
         renderEvents();
+
+        renderWeekCalendar();
 
     }
 );
@@ -2306,17 +2286,36 @@ function openModal(){
 
     modal.classList.add("show");
 
+    document.querySelector(
+        ".modal-header h2"
+    ).textContent =
+        "Add Event";
+
+    eventForm.reset();
+
+    delete eventForm.dataset.editingId;
 
     document.getElementById(
-    "eventStartDate"
-).value =
-    getDateKey(selectedDate);
+        "eventStartDate"
+    ).value =
+        getDateKey(selectedDate);
 
 
     document.getElementById(
-    "eventEndDate"
-).value =
-    getDateKecustom audio */
+        "eventEndDate"
+    ).value =
+        getDateKey(selectedDate);
+
+
+    document.getElementById(
+        "customRepeatGroup"
+    ).style.display =
+        "none";
+
+
+    uploadedAudio = null;
+
+    /* Reset custom audio */
 
     document.getElementById(
         "audioGroup"
@@ -2340,6 +2339,36 @@ function openModal(){
         updateTimeFields();
 
     }
+
+}
+
+
+function closeModal(){
+
+    modal.classList.remove("show");
+
+    eventForm.reset();
+
+    delete eventForm.dataset.editingId;
+
+    uploadedAudio = null;
+
+    document.getElementById(
+        "audioGroup"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "audioPreview"
+    ).style.display =
+        "none";
+
+
+    document.getElementById(
+        "customRepeatGroup"
+    ).style.display =
+        "none";
 
 }
 
@@ -2371,7 +2400,7 @@ document
     closeModal
 );
 
-    /* =========================================
+/* =========================================
    EDIT EVENT
 ========================================= */
 
@@ -2669,7 +2698,7 @@ timeType.addEventListener(
 
 updateTimeFields();
 
-    /* =========================================
+/* =========================================
    CUSTOM REPEAT
 ========================================= */
 
@@ -2705,7 +2734,7 @@ eventRepeat.addEventListener(
     }
 );
 
-    const repeatEndType =
+const repeatEndType =
     document.getElementById(
         "repeatEndType"
     );
@@ -2911,17 +2940,6 @@ if(endDate < startDate){
         }
 
 
-        if(!startDate){
-
-            alert(
-                "Please choose a date."
-            );
-
-            return;
-
-        }
-
-
         const editingId =
             eventForm.dataset.editingId;
 
@@ -3021,6 +3039,8 @@ currentDate =
             renderCalendar();
 
             renderEvents();
+
+            renderWeekCalendar();
 
 
             alert(
@@ -3127,6 +3147,8 @@ currentDate =
         renderCalendar();
 
         renderEvents();
+
+        renderWeekCalendar();
 
 
         alert(
@@ -3263,7 +3285,7 @@ weekViewButton.addEventListener(
     showWeekView
 );
 
-    /* =========================================
+/* =========================================
    SMART SCHEDULING
 ========================================= */
 
@@ -3297,7 +3319,7 @@ document
         smartModal.classList.add("show");
 
         smartDate.value =
-            getDateKey(Date);
+            getDateKey(new Date());
 
         smartTitle.focus();
 
@@ -3835,3 +3857,4 @@ renderEvents();
 
 </body>
 </html>
+    
