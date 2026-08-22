@@ -1798,20 +1798,55 @@ function getEventsForDate(date){
 
     return events.filter(function(event){
 
-        const current = new Date(date + "T00:00:00");
-const start = new Date(event.startDate + "T00:00:00");
-const end = new Date((event.endDate || event.startDate) + "T00:00:00");
+        const current =
+            new Date(date + "T00:00:00");
+
+        const start =
+            new Date(
+                event.startDate + "T00:00:00"
+            );
+
+        const end =
+            new Date(
+                (event.endDate || event.startDate) +
+                "T00:00:00"
+            );
+
 
         /* =========================
-           ORIGINAL EVENT DATE
+           ORIGINAL EVENT DATE RANGE
         ========================= */
 
         if(
-    date >= event.startDate &&
-    date <= (event.endDate || event.startDate)
-){
-    return true;
-}
+            current >= start &&
+            current <= end
+        ){
+
+            return true;
+
+        }
+
+
+        /* =========================
+           NO REPEAT
+        ========================= */
+
+        if(event.repeat === "none"){
+
+            return false;
+
+        }
+
+
+        /* =========================
+           BEFORE START DATE
+        ========================= */
+
+        if(current < start){
+
+            return false;
+
+        }
 
 
         /* =========================
@@ -2256,16 +2291,27 @@ updateTimeFields();
         ){
 
             const newDate =
-                prompt(
-                    "Move event to date:\n\nYYYY-MM-DD",
-                    event.date
-                );
+    prompt(
+        "Move event to date:\n\nYYYY-MM-DD",
+        event.startDate
+    );
 
 
-            if(newDate){
+if(newDate){
 
-                event.date =
-                    newDate;
+    event.startDate =
+        newDate;
+
+    event.endDate =
+        newDate;
+
+    event.status =
+        "moved";
+
+    event.moved =
+        (event.moved || 0) + 1;
+
+}
 
                 event.status =
                     "moved";
@@ -2298,14 +2344,15 @@ function openModal(){
 
 
     document.getElementById(
-    "eventStartDate"
-).value =
-    getDateKey(selectedDate);
+        "eventStartDate"
+    ).value =
+        getDateKey(selectedDate);
 
-document.getElementById(
-    "eventEndDate"
-).value =
-    getDateKey(selectedDate);
+
+    document.getElementById(
+        "eventEndDate"
+    ).value =
+        getDateKey(selectedDate);
 
 }
 
@@ -2418,9 +2465,15 @@ function openEditModal(event){
 
 
     document.getElementById(
-        "eventDate"
-    ).value =
-        event.date || "";
+    "eventStartDate"
+).value =
+    event.startDate || "";
+
+
+document.getElementById(
+    "eventEndDate"
+).value =
+    event.endDate || event.startDate || "";
 
 
     document.getElementById(
@@ -2865,10 +2918,48 @@ eventForm.addEventListener(
             ).value.trim();
 
 
-        const date =
-            document.getElementById(
-                "eventDate"
-            ).value;
+        const startDate =
+    document.getElementById(
+        "eventStartDate"
+    ).value;
+
+
+const endDate =
+    document.getElementById(
+        "eventEndDate"
+    ).value;
+
+        if(!startDate){
+
+    alert(
+        "Please choose a start date."
+    );
+
+    return;
+
+}
+
+
+if(!endDate){
+
+    alert(
+        "Please choose an end date."
+    );
+
+    return;
+
+}
+
+
+if(endDate < startDate){
+
+    alert(
+        "End date cannot be before the start date."
+    );
+
+    return;
+
+}
 
 
         if(!title){
@@ -2929,9 +3020,11 @@ eventForm.addEventListener(
                         "eventCategory"
                     ).value;
 
-                event.date =
-                    date;
+                event.startDate =
+    startDate;
 
+event.endDate =
+    endDate;
                 event.start =
                     document.getElementById(
                         "eventStart"
@@ -2973,15 +3066,15 @@ eventForm.addEventListener(
 
 
             selectedDate =
-                new Date(
-                    date + "T00:00:00"
-                );
+    new Date(
+        startDate + "T00:00:00"
+    );
 
 
-            currentDate =
-                new Date(
-                    date + "T00:00:00"
-                );
+currentDate =
+    new Date(
+        startDate + "T00:00:00"
+    );
 
 
             closeModal();
@@ -3019,8 +3112,11 @@ eventForm.addEventListener(
                     "eventCategory"
                 ).value,
 
-            date:
-                date,
+            startDate:
+    date,
+
+endDate:
+    date,
 
     timeType:
     document.getElementById(
@@ -3700,8 +3796,11 @@ function createSmartEvent(
         category:
             "Personal",
 
-        date:
-            date,
+        startDate:
+    startDate,
+
+endDate:
+    endDate,
 
         start:
             String(startHour).padStart(2,"0") +
@@ -3754,15 +3853,15 @@ function createSmartEvent(
 
 
     selectedDate =
-        new Date(
-            date + "T00:00:00"
-        );
+    new Date(
+        startDate + "T00:00:00"
+    );
 
 
-    currentDate =
-        new Date(
-            date + "T00:00:00"
-        );
+currentDate =
+    new Date(
+        startDate + "T00:00:00"
+    );
 
 
     smartModal.classList.remove(
