@@ -2952,15 +2952,16 @@ function showMonthView(){
     calendar.style.display =
         "grid";
 
-    document.getElementById(
-        "weekCalendar"
-    ).style.display =
+    weekCalendar.style.display =
         "none";
+
+    monthViewButton.classList.add("active");
+
+    weekViewButton.classList.remove("active");
 
     renderCalendar();
 
 }
-
 
 function showWeekView(){
 
