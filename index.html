@@ -1251,91 +1251,182 @@ eventElement.textContent =
 
 function getEventsForDate(date){
 
-    return events.filter(
-        function(event){
+    return events.filter(function(event){
 
-            if(
-                event.date === date
-            ){
+        const current = new Date(date + "T00:00:00");
+        const start = new Date(event.date + "T00:00:00");
 
-                return true;
+        /* =========================
+           ORIGINAL EVENT DATE
+        ========================= */
 
-            }
-
-
-            if(
-                event.repeat === "daily"
-            ){
-
-                return (
-                    new Date(date) >=
-                    new Date(event.date)
-                );
-
-            }
+        if(event.date === date){
+            return true;
+        }
 
 
-            if(
-                event.repeat === "weekly"
-            ){
+        /* =========================
+           NO REPEAT
+        ========================= */
 
-                const start =
-                    new Date(
-                        event.date
-                    );
-
-                const current =
-                    new Date(
-                        date
-                    );
-
-
-                const difference =
-                    Math.floor(
-                        (
-                            current -
-                            start
-                        ) /
-                        86400000
-                    );
-
-
-                return (
-                    difference >= 0 &&
-                    difference % 7 === 0
-                );
-
-            }
-
-
-            if(
-                event.repeat === "monthly"
-            ){
-
-                const start =
-                    new Date(
-                        event.date
-                    );
-
-                const current =
-                    new Date(
-                        date
-                    );
-
-
-                return (
-                    current >= start &&
-                    current.getDate() ===
-                    start.getDate()
-                );
-
-            }
-
-
+        if(event.repeat === "none"){
             return false;
+        }
+
+
+        /* =========================
+           BEFORE START DATE
+        ========================= */
+
+        if(current < start){
+            return false;
+        }
+
+
+        /* =========================
+           DAILY
+        ========================= */
+
+        if(event.repeat === "daily"){
+
+            return true;
 
         }
-    );
+
+
+        /* =========================
+           WEEKLY
+        ========================= */
+
+        if(event.repeat === "weekly"){
+
+            const difference =
+                Math.floor(
+                    (current - start) / 86400000
+                );
+
+            return difference % 7 === 0;
+
+        }
+
+
+        /* =========================
+           MONTHLY
+        ========================= */
+
+        if(event.repeat === "monthly"){
+
+            return (
+                current.getDate() ===
+                start.getDate()
+            );
+
+        }
+
+
+        /* =========================
+           CUSTOM
+        ========================= */
+
+        if(event.repeat === "custom"){
+
+            if(!event.customRepeat){
+                return false;
+            }
+
+            const settings =
+                event.customRepeat;
+
+
+            /* Check selected weekday */
+
+            if(
+                !settings.days ||
+                !settings.days.includes(
+                    current.getDay()
+                )
+            ){
+
+                return false;
+
+            }
+
+
+            /* =========================
+               END DATE
+            ========================= */
+
+            if(
+                settings.endType === "date" &&
+                settings.endDate
+            ){
+
+                const endDate =
+                    new Date(
+                        settings.endDate +
+                        "T00:00:00"
+                    );
+
+                if(current > endDate){
+                    return false;
+                }
+
+            }
+
+
+            /* =========================
+               OCCURRENCES
+            ========================= */
+
+            if(
+                settings.endType ===
+                "occurrences" &&
+                settings.occurrences
+            ){
+
+                const occurrences =
+                    Number(
+                        settings.occurrences
+                    );
+
+                let count = 0;
+
+                const temp =
+                    new Date(start);
+
+                while(temp <= current){
+
+                    if(
+                        settings.days.includes(
+                            temp.getDay()
+                        )
+                    ){
+
+                        count++;
+
+                    }
+
+                    temp.setDate(
+                        temp.getDate() + 1
+                    );
+
+                }
+
+                if(count > occurrences){
+                    return false;
+                }
+
+            }
+
+
+            return true;
+
+        }
+
+
+        return false;
+
+    });
 
 }
 
@@ -1795,6 +1886,59 @@ function openEditModal(event){
     ).value =
         event.repeat || "none";
 
+    /* Load custom repeat settings */
+
+document.querySelectorAll(
+    ".repeat-day"
+).forEach(function(checkbox){
+
+    checkbox.checked =
+        event.customRepeat &&
+        event.customRepeat.days
+        ? event.customRepeat.days.includes(
+            Number(checkbox.value)
+        )
+        : false;
+
+});
+
+
+if(event.repeat === "custom"){
+
+    customRepeatGroup.style.display =
+        "block";
+
+    if(event.customRepeat){
+
+        document.getElementById(
+            "repeatEndType"
+        ).value =
+            event.customRepeat.endType ||
+            "never";
+
+
+        document.getElementById(
+            "repeatEndDate"
+        ).value =
+            event.customRepeat.endDate ||
+            "";
+
+
+        document.getElementById(
+            "repeatOccurrences"
+        ).value =
+            event.customRepeat.occurrences ||
+            "";
+
+    }
+
+}else{
+
+    customRepeatGroup.style.display =
+        "none";
+
+}
+
 
     document.getElementById(
         "alarmType"
@@ -2205,6 +2349,9 @@ eventForm.addEventListener(
                         "eventRepeat"
                     ).value;
 
+                event.customRepeat =
+    getCustomRepeatSettings();
+                
                 event.alarm =
                     document.getElementById(
                         "alarmType"
