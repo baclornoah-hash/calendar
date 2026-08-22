@@ -213,6 +213,11 @@ header button{
     gap:5px;
 }
 
+    .edit{
+    background:#dceffc;
+    color:var(--navy);
+}
+    
 .actions button{
     border:0;
     border-radius:7px;
@@ -1261,6 +1266,15 @@ function renderEvents(){
 
                 <div class="actions">
 
+<button
+    class="edit"
+    data-id="${event.id}"
+    data-action="edit">
+
+    ✏️ Edit
+
+</button>
+
                     <button
                         class="complete"
                         data-id="${event.id}"
@@ -1347,7 +1361,17 @@ document
 
         if(!event) return;
 
+if(
+    action ===
+    "edit"
+){
 
+    openEditModal(event);
+
+    return;
+
+}
+        
         if(
             action ===
             "complete"
@@ -1454,19 +1478,50 @@ function closeModal(){
         "show"
     );
 
+
     eventForm.reset();
 
+
+    /* Clear edit mode */
+
+    delete eventForm.dataset.editingId;
+
+
     uploadedAudio = null;
+
+
+    /* Change title back to Add Event */
+
+    document.querySelector(
+        ".modal-header h2"
+    ).textContent =
+        "Add Event";
+
+
+    /* Hide custom audio */
 
     document.getElementById(
         "audioGroup"
     ).style.display =
         "none";
 
+
     document.getElementById(
         "audioPreview"
     ).style.display =
         "none";
+
+
+    /* Reset time fields */
+
+    if(
+        typeof updateTimeFields ===
+        "function"
+    ){
+
+        updateTimeFields();
+
+    }
 
 }
 
@@ -1498,6 +1553,101 @@ document
     closeModal
 );
 
+    /* =========================================
+   EDIT EVENT
+========================================= */
+
+function openEditModal(event){
+
+    modal.classList.add("show");
+
+    document.querySelector(
+        ".modal-header h2"
+    ).textContent =
+        "Edit Event";
+
+
+    document.getElementById(
+        "eventTitle"
+    ).value =
+        event.title || "";
+
+
+    document.getElementById(
+        "eventCategory"
+    ).value =
+        event.category || "Personal";
+
+
+    document.getElementById(
+        "eventDate"
+    ).value =
+        event.date || "";
+
+
+    document.getElementById(
+        "eventStart"
+    ).value =
+        event.start || "";
+
+
+    document.getElementById(
+        "eventEnd"
+    ).value =
+        event.end || "";
+
+
+    document.getElementById(
+        "eventDescription"
+    ).value =
+        event.description || "";
+
+
+    document.getElementById(
+        "eventRepeat"
+    ).value =
+        event.repeat || "none";
+
+
+    document.getElementById(
+        "alarmType"
+    ).value =
+        event.alarm || "none";
+
+
+    uploadedAudio =
+        event.audio || null;
+
+
+    if(event.audio){
+
+        const preview =
+            document.getElementById(
+                "audioPreview"
+            );
+
+        preview.src =
+            event.audio;
+
+        preview.style.display =
+            "block";
+
+    }
+
+
+    document.getElementById(
+        "audioGroup"
+    ).style.display =
+        event.alarm === "custom"
+        ? "block"
+        : "none";
+
+
+    eventForm.dataset.editingId =
+        event.id;
+
+}
+    
 
 /* =========================================
    DATE / MONTH
@@ -1729,6 +1879,111 @@ eventForm.addEventListener(
         }
 
 
+        const editingId =
+            eventForm.dataset.editingId;
+
+
+        /* =================================
+           EDIT EXISTING EVENT
+        ================================= */
+
+        if(editingId){
+
+            const event =
+                events.find(
+                    function(item){
+
+                        return item.id ===
+                            editingId;
+
+                    }
+                );
+
+
+            if(event){
+
+                event.title =
+                    title;
+
+                event.category =
+                    document.getElementById(
+                        "eventCategory"
+                    ).value;
+
+                event.date =
+                    date;
+
+                event.start =
+                    document.getElementById(
+                        "eventStart"
+                    ).value;
+
+                event.end =
+                    document.getElementById(
+                        "eventEnd"
+                    ).value;
+
+                event.description =
+                    document.getElementById(
+                        "eventDescription"
+                    ).value;
+
+                event.repeat =
+                    document.getElementById(
+                        "eventRepeat"
+                    ).value;
+
+                event.alarm =
+                    document.getElementById(
+                        "alarmType"
+                    ).value;
+
+                event.audio =
+                    uploadedAudio;
+
+            }
+
+
+            delete eventForm.dataset.editingId;
+
+
+            saveEvents();
+
+
+            selectedDate =
+                new Date(
+                    date + "T00:00:00"
+                );
+
+
+            currentDate =
+                new Date(
+                    date + "T00:00:00"
+                );
+
+
+            closeModal();
+
+
+            renderCalendar();
+
+            renderEvents();
+
+
+            alert(
+                "Event updated! ✏️"
+            );
+
+
+            return;
+
+        }
+
+
+        /* =================================
+           CREATE NEW EVENT
+        ================================= */
+
         const newEvent = {
 
             id:
@@ -1745,20 +2000,15 @@ eventForm.addEventListener(
             date:
                 date,
 
-            timeType:
-    document.getElementById(
-        "timeType"
-    ).value,
+            start:
+                document.getElementById(
+                    "eventStart"
+                ).value,
 
-start:
-    document.getElementById(
-        "eventStart"
-    ).value,
-
-end:
-    document.getElementById(
-        "eventEnd"
-    ).value,
+            end:
+                document.getElementById(
+                    "eventEnd"
+                ).value,
 
             description:
                 document.getElementById(
