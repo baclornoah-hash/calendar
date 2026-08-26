@@ -5752,4 +5752,349 @@ function findAvailableTime(
 
             possibleTime =
                 Math.max(
+                    possibleTime,
+                    nextBusy.end
+                    );
+        }
+    }
+    return null;
+}
+    
+/* =========================================
+FORMAT TIME
+========================================= */
+
+function formatTime(minutes){
+
+    let hour =
+        Math.floor(minutes / 60);
+
+    let minute =
+        minutes % 60;
+
+
+    const period =
+        hour >= 12
+        ? "PM"
+        : "AM";
+
+let displayHour =
+   hour % 12;
+
+    if(displayHour === 0){
+        displayHour = 12;
+
+    }
+
+
+    return (
+        displayHour +
+        ":" +
+        String(minute).padStart(2,"0") +
+        " " +
+        period
+    );
+
+}
+/* =========================================
+   FIND BEST TIME BUTTON
+========================================= */
+
+document
+.getElementById("findSmartTime")
+.addEventListener(
+    "click",
+    function(){
+
+        const title =
+            smartTitle.value.trim();
+
+
+        const date =
+            smartDate.value;
+
+
+        const duration =
+            Number(
+                smartDuration.value
+            );
+
+
+        const preference =
+            smartPreference.value;
+
+
+        if(!title){
+
+            alert(
+                "Tell me what you need to schedule."
+            );
+
+            return;
+
+        }
+
+
+        if(!date){
+
+            alert(
+                "Please choose a date."
+            );
+
+            return;
+
+        }
+
+
+        const result =
+            findAvailableTime(
+                date,
+                duration,
+                preference
+            );
+
+
+        /* =================================
+           NO TIME FOUND
+        ================================= */
+
+        if(!result){
+
+            smartResult.innerHTML = `
+
+                <div class="smart-result">
+
+                    <h3>
+                        😕 No suitable time found
+                    </h3>
+
+                    <p>
+                        MindCal couldn't find enough
+                        free time on this day.
+                    </p>
+
+                    <p>
+                        Try another date or a
+                        shorter duration.
+                    </p>
+
+                </div>
+
+            `;
+
+            return;
+
+        }
+
+
+        /* =================================
+           SHOW SUGGESTION
+        ================================= */
+
+        smartResult.innerHTML = `
+
+            <div class="smart-result">
+
+                <h3>
+                    ✨ I found a free time!
+                </h3>
+
+                <div class="smart-time">
+
+                    ${formatTime(result.start)}
+                    –
+                    ${formatTime(result.end)}
+
+                </div>
+
+                <p>
+                    ${escapeHTML(title)}
+                </p>
+
+                <button id="acceptSmartSchedule">
+
+                    ✓ Schedule It
+
+                </button>
+
+            </div>
+
+        `;
+
+
+        /* SCHEDULE BUTTON */
+
+        document
+        .getElementById(
+            "acceptSmartSchedule"
+        )
+        .addEventListener(
+            "click",
+            function(){
+
+                createSmartEvent(
+                    title,
+                    date,
+                    result.start,
+                    result.end,
+                    smartPriority.value
+                );
+
+            }
+        );
+
+    }
+);
+
+
+/* =========================================
+   CREATE SMART EVENT
+========================================= */
+
+function createSmartEvent(
+    title,
+    date,
+    startMinutes,
+    endMinutes,
+    priority
+){
+
+    const startHour =
+        Math.floor(
+            startMinutes / 60
+        );
+
+
+    const startMinute =
+        startMinutes % 60;
+
+
+    const endHour =
+        Math.floor(
+            endMinutes / 60
+        );
+
+
+    const endMinute =
+        endMinutes % 60;
+
+
+    const newEvent = {
+
+        id:
+            Date.now().toString(),
+
+        title:
+            title,
+
+        category:
+            "Personal",
+
+        priority:
+            priority || "none",
+
+        startDate:
+    date,
+
+endDate:
+    date,
+
+        start:
+            String(startHour).padStart(2,"0") +
+            ":" +
+            String(startMinute).padStart(2,"0"),
+
+        end:
+            String(endHour).padStart(2,"0") +
+            ":" +
+            String(endMinute).padStart(2,"0"),
+
+        timeType:
+            "specific",
+
+        description:
+            "Created using Smart Schedule.",
+
+        repeat:
+            "none",
+
+        customRepeat:
+            {
+                days:[],
+                endType:"never",
+                endDate:"",
+                occurrences:""
+            },
+
+        alarm:
+            "none",
+
+        audio:
+            null,
+
+        status:
+            "scheduled",
+
+        moved:
+            0
+
+    };
+
+
+    events.push(
+        newEvent
+    );
+
+
+    saveEvents();
+
+
+    selectedDate =
+    new Date(
+        date + "T00:00:00"
+    );
+
+
+currentDate =
+    new Date(
+        date + "T00:00:00"
+    );
+
+
+    smartModal.classList.remove(
+        "show"
+    );
+
+
+    smartResult.innerHTML = "";
+
+
+    renderCalendar();
+
+    renderEvents();
+
+    renderWeekCalendar();
+    renderDayCalendar();
+
+
+    alert(
+        "Smart event scheduled! ✨"
+    );
+
+}
+    
+/* =========================================
+   INITIAL LOAD
+========================================= */
+
+renderCalendar();
+
+renderEvents();
+    
+</script>
+
+</body>
+</html
+
+    
          
