@@ -1078,3 +1078,1083 @@ textarea{
 
 
     <div id="calendar" class="calendar"></div>
+
+    <div id="weekCalendar" class="week-calendar" style="display:none;"></div>
+
+    <div id="dayCalendar" class="day-calendar" style="display:none;"></div>
+
+    <div id="habitTracker" class="habit-tracker" style="display:none;"></div>
+
+</div>
+
+
+<!-- RIGHT SIDE -->
+
+<div>
+
+
+<div class="card">
+
+    <button class="add-event" id="addEventButton">
+    ＋ Add Event
+</button>
+
+<button class="smart-schedule" id="smartScheduleButton">
+    ✨ Smart Schedule
+</button>
+
+    <h3 id="Title"></h3>
+
+    <div id="eventList"></div>
+
+</div>
+
+
+<br>
+
+
+<div class="card">
+
+    <h3>🧠 Brain Dump</h3>
+
+    <p style="font-size:12px;color:#627d98;">
+        Save ideas here without turning them into calendar events.
+    </p>
+
+    <textarea
+        id="brainDump"
+        placeholder="New screenplay idea... website idea... something you don't want to forget..."></textarea>
+
+    <button class="save-dump" id="saveBrainDump">
+        Save Brain Dump
+    </button>
+
+    <div id="brainMessage" class="message"></div>
+
+</div>
+
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- EVENT MODAL -->
+
+<div class="modal" id="eventModal">
+
+<div class="modal-box">
+
+    <div class="modal-header">
+
+        <h2>Add Event</h2>
+
+        <button class="close" id="closeModal">
+            ×
+        </button>
+
+    </div>
+
+
+    <form id="eventForm">
+
+        <div class="form-grid">
+
+
+            <div class="form-group full">
+
+                <label>Event Title</label>
+
+                <input
+                    id="eventTitle"
+                    type="text"
+                    placeholder="Example: Write screenplay"
+                    required>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Category</label>
+
+                <select id="eventCategory">
+
+                    <option>Personal</option>
+                    <option>Work</option>
+                    <option>Study</option>
+                    <option>Writing</option>
+                    <option>Coding</option>
+                    <option>Exercise</option>
+                    <option>Social</option>
+                    <option>Chores</option>
+                    <option>Health</option>
+                    <option>Other</option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Priority</label>
+
+                <select id="eventPriority">
+
+                    <option value="must">
+                        🔴 Must Get Done
+                    </option>
+
+                    <option value="could">
+                        🟡 Could Get Done Today
+                    </option>
+
+                    <option value="none" selected>
+                        ⚪ Everything Else
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label>Start Date</label>
+
+<input
+    id="eventStartDate"
+    type="date"
+    required>
+
+</div>
+
+
+<div class="form-group">
+
+    <label>End Date</label>
+
+    <input
+        id="eventEndDate"
+        type="date"
+        required>
+
+</div>
+
+
+            <div class="form-group">
+
+    <label>Time</label>
+
+    <select id="timeType">
+
+        <option value="specific">
+            Specific Time
+        </option>
+
+        <option value="morning">
+            🌅 Morning
+        </option>
+
+        <option value="afternoon">
+            ☀️ Afternoon
+        </option>
+
+        <option value="evening">
+            🌆 Evening
+        </option>
+
+        <option value="night">
+            🌙 Night
+        </option>
+
+        <option value="flexible">
+            🧠 Flexible / Anytime
+        </option>
+
+        <option value="all-day">
+            📅 All Day
+        </option>
+
+    </select>
+
+</div>
+
+
+<div
+    class="form-group"
+    id="specificTimeGroup">
+
+    <label>Start Time</label>
+
+    <input
+        id="eventStart"
+        type="time">
+
+</div>
+
+
+<div
+    class="form-group"
+    id="endTimeGroup">
+
+    <label>End Time</label>
+
+    <input
+        id="eventEnd"
+        type="time">
+
+</div>
+
+
+            <div class="form-group full">
+
+                <label>Description</label>
+
+                <textarea
+                    id="eventDescription"
+                    placeholder="Notes, location, details..."></textarea>
+
+            </div>
+
+
+            <div class="form-group">
+
+    <label>Repeat</label>
+
+    <select id="eventRepeat">
+
+        <option value="none">
+            Does not repeat
+        </option>
+
+        <option value="daily">
+            Every day
+        </option>
+
+        <option value="weekly">
+            Every week
+        </option>
+
+        <option value="monthly">
+            Every month
+        </option>
+
+        <option value="custom">
+            Custom
+        </option>
+
+    </select>
+
+</div>
+
+            <!-- CUSTOM REPEAT OPTIONS -->
+
+<div
+    class="form-group full"
+    id="customRepeatGroup"
+    style="display:none;">
+
+    <label>Repeat On</label>
+
+    <div class="day-selector">
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="0"
+                class="repeat-day">
+            Sun
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="1"
+                class="repeat-day">
+            Mon
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="2"
+                class="repeat-day">
+            Tue
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="3"
+                class="repeat-day">
+            Wed
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="4"
+                class="repeat-day">
+            Thu
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="5"
+                class="repeat-day">
+            Fri
+        </label>
+
+        <label class="day-option">
+            <input
+                type="checkbox"
+                value="6"
+                class="repeat-day">
+            Sat
+        </label>
+
+    </div>
+
+
+    <label style="margin-top:15px;">
+        Ends
+    </label>
+
+    <select id="repeatEndType">
+
+        <option value="never">
+            Never
+        </option>
+
+        <option value="date">
+            On a specific date
+        </option>
+
+        <option value="occurrences">
+            After a number of occurrences
+        </option>
+
+    </select>
+
+
+    <div
+        id="repeatEndDateGroup"
+        style="display:none; margin-top:10px;">
+
+        <label>
+            End Date
+        </label>
+
+        <input
+            id="repeatEndDate"
+            type="date">
+
+    </div>
+
+
+    <div
+        id="repeatOccurrencesGroup"
+        style="display:none; margin-top:10px;">
+
+        <label>
+            Number of Occurrences
+        </label>
+
+        <input
+            id="repeatOccurrences"
+            type="number"
+            min="1"
+            placeholder="Example: 10">
+
+    </div>
+
+</div>
+
+            <div class="form-group">
+
+                <label>Alarm</label>
+
+                <select id="alarmType">
+
+                    <option value="none">
+                        No alarm
+                    </option>
+
+                    <option value="default">
+                        Default alarm
+                    </option>
+
+                    <option value="custom">
+                        Upload music/audio
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <div
+                class="form-group full"
+                id="audioGroup"
+                style="display:none;">
+
+                <label>Upload Alarm Music</label>
+
+                <input
+                    id="audioFile"
+                    type="file"
+                    accept="audio/*">
+
+                <audio
+                    id="audioPreview"
+                    class="audio-preview"
+                    controls
+                    style="display:none;">
+                </audio>
+
+            </div>
+
+
+        </div>
+
+
+        <button
+            class="save-event"
+            type="submit">
+
+            Save Event
+
+        </button>
+
+    </form>
+
+</div>
+
+</div>
+
+<!-- SMART SCHEDULE MODAL -->
+
+<div class="modal" id="smartModal">
+
+    <div class="modal-box">
+
+        <div class="modal-header">
+
+            <h2>✨ Smart Schedule</h2>
+
+            <button class="close" id="closeSmartModal">
+                ×
+            </button>
+
+        </div>
+
+        <p style="font-size:13px;color:#627d98;">
+            Tell MindCal what you need to do, and it will find
+            an available time around your existing events.
+        </p>
+
+        <div class="form-group">
+
+            <label>What do you need to do?</label>
+
+            <input
+                id="smartTitle"
+                type="text"
+                placeholder="Example: Study for exam"
+                required>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Duration</label>
+
+            <select id="smartDuration">
+
+                <option value="30">30 minutes</option>
+                <option value="60">1 hour</option>
+                <option value="90">1 hour 30 minutes</option>
+                <option value="120">2 hours</option>
+                <option value="180">3 hours</option>
+                <option value="240">4 hours</option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Priority</label>
+
+            <select id="smartPriority">
+
+                <option value="must">
+                    🔴 Must Get Done
+                </option>
+
+                <option value="could">
+                    🟡 Could Get Done Today
+                </option>
+
+                <option value="none" selected>
+                    ⚪ Everything Else
+                </option>
+
+            </select>
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Preferred Date</label>
+
+            <input
+                id="smartDate"
+                type="date">
+
+        </div>
+
+        <div class="form-group">
+
+            <label>Preferred Time</label>
+
+            <select id="smartPreference">
+
+                <option value="any">
+                    🧠 Any available time
+                </option>
+
+                <option value="morning">
+                    🌅 Morning
+                </option>
+
+                <option value="afternoon">
+                    ☀️ Afternoon
+                </option>
+
+                <option value="evening">
+                    🌆 Evening
+                </option>
+
+                <option value="night">
+                    🌙 Night
+                </option>
+
+            </select>
+
+        </div>
+
+        <button
+            class="save-event"
+            id="findSmartTime">
+
+            ✨ Find Best Time
+
+        </button>
+
+        <div
+            id="smartResult"
+            style="
+                margin-top:15px;
+                font-size:13px;
+            ">
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* =========================================
+   SAFE STORAGE
+   Some browsers/contexts (Safari on file://
+   pages, sandboxed previews, some in-app
+   webviews) throw a SecurityError just for
+   touching localStorage. Since that would
+   happen as the very first thing this script
+   does, an uncaught throw here would stop
+   every line below it from ever running —
+   including every addEventListener call —
+   which is why every button would stop
+   working at once. These wrappers make sure
+   that can never happen: the app just runs
+   without persistence instead of not running
+   at all.
+========================================= */
+
+function safeStorageGet(key){
+
+    try{
+
+        return localStorage.getItem(key);
+
+    }catch(e){
+
+        return null;
+
+    }
+
+}
+
+
+function safeStorageSet(key, value){
+
+    try{
+
+        localStorage.setItem(key, value);
+
+    }catch(e){
+
+        /* Storage unavailable — data won't
+           persist across reloads, but the
+           app keeps working this session. */
+
+    }
+
+}
+
+
+function loadJSON(key, fallback){
+
+    try{
+
+        const raw =
+            safeStorageGet(key);
+
+        return raw
+            ? JSON.parse(raw)
+            : fallback;
+
+    }catch(e){
+
+        return fallback;
+
+    }
+
+}
+
+
+/* =========================================
+   DATA
+========================================= */
+
+let events =
+    loadJSON("mindcal_events", []);
+
+
+let brainDump =
+    safeStorageGet(
+        "mindcal_brain_dump"
+    ) || "";
+
+
+let habits =
+    loadJSON("mindcal_habits", []);
+
+
+let habitLog =
+    loadJSON("mindcal_habit_log", {});
+
+/* habitLog[habitId] = { "YYYY-MM-DD": true } */
+
+
+let habitMonthDate = new Date();
+
+
+let currentDate = new Date();
+
+let selectedDate = new Date();
+
+let uploadedAudio = null;
+
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const calendar =
+    document.getElementById("calendar");
+
+const weekCalendar =
+    document.getElementById("weekCalendar");
+
+const dayCalendar =
+    document.getElementById("dayCalendar");
+
+const habitTracker =
+    document.getElementById("habitTracker");
+
+const weekdaysRow =
+    document.getElementById("weekdaysRow");
+
+const monthViewButton =
+    document.getElementById("monthViewButton");
+
+const weekViewButton =
+    document.getElementById("weekViewButton");
+
+const dayViewButton =
+    document.getElementById("dayViewButton");
+
+const habitViewButton =
+    document.getElementById("habitViewButton");
+
+const modal =
+    document.getElementById("eventModal");
+
+const eventForm =
+    document.getElementById("eventForm");
+    
+const brainDumpBox =
+    document.getElementById("brainDump");
+
+
+brainDumpBox.value = brainDump;
+
+
+/* =========================================
+   DATE FUNCTION
+========================================= */
+
+function getDateKey(date){
+
+    let year =
+        date.getFullYear();
+
+    let month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2,"0");
+
+    let day =
+        String(
+            date.getDate()
+        ).padStart(2,"0");
+
+    return `${year}-${month}-${day}`;
+
+}
+
+
+/* =========================================
+   SAVE DATA
+========================================= */
+
+function saveEvents(){
+
+    safeStorageSet(
+        "mindcal_events",
+        JSON.stringify(events)
+    );
+
+}
+
+function saveHabits(){
+
+    safeStorageSet(
+        "mindcal_habits",
+        JSON.stringify(habits)
+    );
+
+}
+
+function saveHabitLog(){
+
+    safeStorageSet(
+        "mindcal_habit_log",
+        JSON.stringify(habitLog)
+    );
+
+}
+
+function getCustomRepeatSettings(){
+
+    const days = [];
+
+    document
+    .querySelectorAll(".repeat-day:checked")
+    .forEach(function(checkbox){
+
+        days.push(
+            Number(checkbox.value)
+        );
+
+    });
+
+
+    return {
+
+        days: days,
+
+        endType:
+            document.getElementById(
+                "repeatEndType"
+            ).value,
+
+        endDate:
+            document.getElementById(
+                "repeatEndDate"
+            ).value,
+
+        occurrences:
+            document.getElementById(
+                "repeatOccurrences"
+            ).value
+
+    };
+
+}
+
+
+/* =========================================
+   RENDER CALENDAR
+========================================= */
+
+function renderCalendar(){
+
+    calendar.innerHTML = "";
+
+    const year =
+        currentDate.getFullYear();
+
+    const month =
+        currentDate.getMonth();
+
+
+    document.getElementById(
+        "monthTitle"
+    ).textContent =
+        currentDate.toLocaleDateString(
+            undefined,
+            {
+                month:"long",
+                year:"numeric"
+            }
+        );
+
+
+    const firstDay =
+        new Date(
+            year,
+            month,
+            1
+        ).getDay();
+
+
+    const days =
+        new Date(
+            year,
+            month + 1,
+            0
+        ).getDate();
+
+
+    for(
+        let i = 0;
+        i < 42;
+        i++
+    ){
+
+        const number =
+            i - firstDay + 1;
+
+
+        const cellDate =
+            new Date(
+                year,
+                month,
+                number
+            );
+
+
+        const cell =
+            document.createElement("div");
+
+
+        cell.className = "day";
+
+
+        const key =
+            getDateKey(cellDate);
+
+
+        cell.dataset.date =
+            key;
+
+
+        if(
+            key ===
+            getDateKey(new Date())
+        ){
+
+            cell.classList.add("today");
+
+        }
+
+
+        if(
+    key ===
+    getDateKey(selectedDate)
+){
+
+    cell.classList.add("selected");
+
+}
+
+
+        const numberElement =
+            document.createElement("div");
+
+
+        numberElement.className =
+            "day-number";
+
+
+        numberElement.textContent =
+            cellDate.getDate();
+
+
+        cell.appendChild(
+            numberElement
+        );
+
+
+        const dayEvents =
+            getEventsForDate(key);
+
+        dayEvents.sort(function(a,b){
+            return getPriorityRank(a) - getPriorityRank(b);
+        });
+
+
+        dayEvents
+        .slice(0,4)
+        .forEach(function(event){
+
+            const eventElement =
+                document.createElement("div");
+
+
+            eventElement.className =
+                "event priority-" +
+                (event.priority || "none");
+
+
+            if(
+                event.status ===
+                "completed"
+            ){
+
+                eventElement.classList.add(
+                    "completed"
+                );
+
+            }
+
+
+            if(
+                event.status ===
+                "cancelled"
+            ){
+
+                eventElement.classList.add(
+                    "cancelled"
+                );
+
+            }
+
+
+            let displayTime = "";
+
+if(event.timeType === "morning"){
+    displayTime = "🌅 ";
+}
+
+else if(event.timeType === "afternoon"){
+    displayTime = "☀️ ";
+}
+
+else if(event.timeType === "evening"){
+    displayTime = "🌆 ";
+}
+
+else if(event.timeType === "night"){
+    displayTime = "🌙 ";
+}
+
+else if(event.timeType === "flexible"){
+    displayTime = "🧠 ";
+}
+
+else if(event.timeType === "all-day"){
+    displayTime = "📅 ";
+}
+
+else if(event.start){
+    displayTime = event.start + " ";
+}
+
+
+eventElement.textContent =
+    displayTime + event.title;
+
+
+            cell.appendChild(
+                eventElement
+            );
+
+        });
+
+
+        cell.addEventListener(
+            "pointerdown",
+            function(e){
+
+                startDateDrag(key);
+
+            }
+        );
+
+
+        calendar.appendChild(cell);
+
+    }
+
+}
+
+/* =========================================
+   RENDER WEEKLY CALENDAR
+========================================= */
+
+function getStartOfWeek(date){
+
+    const result = new Date(date);
+
+    const day = result.getDay();
+
+    // Monday = 0
+    const difference = day === 0 ? -6 : 1 - day;
+
+    result.setDate(
+        result.getDate() + difference
+    );
+
+    result.setHours(0,0,0,0);
+
+    return result;
+}
+
+
+function renderWeekCalendar(){
+
+    const weekCalendar =
+        document.getElementById("weekCalendar");
+
+    weekCalendar.innerHTML = "";
+    
