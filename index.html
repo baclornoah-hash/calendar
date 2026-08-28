@@ -1304,19 +1304,18 @@ textarea{
                 <label>Category</label>
 
                 <select id="eventCategory">
-
-                    <option>Personal</option>
-                    <option>Work</option>
-                    <option>Study</option>
-                    <option>Writing</option>
-                    <option>Coding</option>
-                    <option>Exercise</option>
-                    <option>Social</option>
-                    <option>Chores</option>
-                    <option>Health</option>
-                    <option>Other</option>
-
-                </select>
+    <option>Personal</option>
+    <option>Work</option>
+    <option>Study</option>
+    <option>Writing</option>
+    <option>Coding</option>
+    <option>Exercise</option>
+    <option>Social</option>
+    <option>Chores</option>
+    <option>Health</option>
+    <option>Birthday</option>
+    <option>Other</option>
+</select>
 
             </div>
 
@@ -1465,6 +1464,10 @@ textarea{
         <option value="monthly">
             Every month
         </option>
+
+        <option value="yearly">
+    Every year
+</option>
 
         <option value="custom">
             Custom
@@ -3733,6 +3736,21 @@ function getEventsForDate(date){
             );
 
         }
+
+           /* =========================
+   YEARLY
+========================= */
+
+if(event.repeat === "yearly"){
+
+    return (
+        current.getMonth() ===
+        start.getMonth() &&
+        current.getDate() ===
+        start.getDate()
+    );
+
+}
 
 
         /* =========================
