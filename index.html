@@ -911,24 +911,39 @@ textarea{
     margin-left:8px;
 }
 
+/* DAILY PROGRESS */
+
 .habit-progress-section{
-    margin-top:22px;
+    width:100%;
+    margin-top:30px;
+    padding-top:25px;
+    border-top:2px solid var(--border);
 }
 
 .habit-progress-title{
-    font-size:13px;
+    font-size:15px;
     font-weight:bold;
     color:var(--navy);
-    margin-bottom:10px;
+    margin-bottom:12px;
 }
 
 .habit-progress-chart{
     display:flex;
     align-items:flex-end;
-    gap:2px;
-    height:90px;
+    gap:6px;
+    width:100%;
+    height:150px;
+    padding:10px 4px 0;
     border-bottom:1px solid var(--border);
-    min-width:100%;
+}
+
+.habit-progress-bar{
+    flex:1;
+    min-width:8px;
+    max-width:40px;
+    background:var(--baby);
+    border-radius:5px 5px 0 0;
+    transition:height .2s ease;
 }
 
 .habit-progress-bar{
@@ -3322,12 +3337,24 @@ function renderHabitTracker(){
         tbody
     );
 
-    habitTracker.appendChild(
-        table
-    );
+    /* HABIT CHECKLIST SECTION */
+
+const checklistSection =
+    document.createElement("div");
+
+checklistSection.className =
+    "habit-checklist-section";
+
+checklistSection.appendChild(
+    table
+);
+
+habitTracker.appendChild(
+    checklistSection
+);
 
 
-    /* DAILY PROGRESS CHART */
+/* DAILY PROGRESS CHART */
 
     const progressSection =
         document.createElement("div");
