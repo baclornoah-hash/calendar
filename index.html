@@ -808,7 +808,14 @@ textarea{
 /* HABIT TRACKER */
 
 .habit-tracker{
+    width:100%;
+}
+
+.habit-table-wrapper{
+    width:100%;
     overflow-x:auto;
+    overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
 }
 
 .habit-add-row{
@@ -3349,13 +3356,22 @@ checklistSection.appendChild(
     table
 );
 
+const tableWrapper =
+    document.createElement("div");
+
+tableWrapper.className =
+    "habit-table-wrapper";
+
+tableWrapper.appendChild(
+    table
+);
+
 habitTracker.appendChild(
-    checklistSection
+    tableWrapper
 );
 
 
 /* DAILY PROGRESS CHART */
-
     const progressSection =
         document.createElement("div");
 
