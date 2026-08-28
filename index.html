@@ -967,6 +967,92 @@ textarea{
     font-size:13px;
 }
 
+    /* OVERALL HABIT COMPLETION */
+
+.habit-completion-section{
+    margin-top:30px;
+    padding-top:25px;
+    border-top:2px solid var(--border);
+}
+
+.habit-completion-content{
+    display:flex;
+    align-items:center;
+    gap:22px;
+    padding:20px;
+    background:var(--baby2);
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+.habit-donut{
+    width:120px;
+    height:120px;
+    flex-shrink:0;
+    border-radius:50%;
+    background:conic-gradient(
+        #21B3C3 0deg,
+        #21B3C3 var(--completion-angle),
+        #C7F1F5 var(--completion-angle),
+        #C7F1F5 360deg
+    );
+    position:relative;
+}
+
+.habit-donut::after{
+    content:"";
+    position:absolute;
+    width:78px;
+    height:78px;
+    background:white;
+    border-radius:50%;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+}
+
+.habit-completion-info{
+    display:flex;
+    flex-direction:column;
+    gap:5px;
+}
+
+.habit-completion-percent{
+    font-size:30px;
+    font-weight:bold;
+    line-height:1;
+    color:#087E8B;
+}
+
+.habit-completion-label{
+    font-size:13px;
+    font-weight:bold;
+    color:var(--navy);
+}
+
+@media(max-width:600px){
+
+    .habit-completion-content{
+        gap:18px;
+        padding:16px;
+    }
+
+    .habit-donut{
+        width:95px;
+        height:95px;
+    }
+
+    .habit-donut::after{
+        width:62px;
+        height:62px;
+    }
+
+    .habit-completion-percent{
+        font-size:25px;
+    }
+
+}
+
     .smart-schedule{
     width:100%;
     padding:14px;
@@ -3370,6 +3456,82 @@ habitTracker.appendChild(
     tableWrapper
 );
 
+    /* OVERALL HABIT COMPLETION */
+
+let totalBoxes =
+    habits.length * daysInMonth;
+
+let completedBoxes = 0;
+
+habits.forEach(function(habit){
+
+    for(
+        let day = 1;
+        day <= daysInMonth;
+        day++
+    ){
+
+        const dateKey =
+            getDateKey(
+                new Date(year, month, day)
+            );
+
+        if(
+            habitLog[habit.id] &&
+            habitLog[habit.id][dateKey]
+        ){
+            completedBoxes++;
+        }
+
+    }
+
+});
+
+const completionPercent =
+    totalBoxes > 0
+    ? Math.round(
+        (completedBoxes / totalBoxes) * 100
+      )
+    : 0;
+
+const completionAngle =
+    completionPercent * 3.6;
+
+const completionSection =
+    document.createElement("div");
+
+completionSection.className =
+    "habit-completion-section";
+
+completionSection.innerHTML = `
+
+    <div class="habit-completion-content">
+
+        <div
+            class="habit-donut"
+            style="--completion-angle:${completionAngle}deg;"
+            aria-label="${completionPercent}% completed"
+        ></div>
+
+        <div class="habit-completion-info">
+
+            <div class="habit-completion-percent">
+                ${completionPercent}%
+            </div>
+
+            <div class="habit-completion-label">
+                Overall Completion
+            </div>
+
+        </div>
+
+    </div>
+
+`;
+
+habitTracker.appendChild(
+    completionSection
+);
 
 /* DAILY PROGRESS CHART */
     const progressSection =
