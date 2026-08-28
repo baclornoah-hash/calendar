@@ -115,7 +115,8 @@ header button{
 .weekdays,
 .calendar{
     display:grid;
-    grid-template-columns:repeat(7,1fr);
+    grid-template-columns:repeat(7,minmax(0,1fr));
+    width:100%;
 }
 
 .weekday{
@@ -127,13 +128,16 @@ header button{
 }
 
 .day{
+    min-width:0;
     min-height:105px;
+    width:100%;
     border:1px solid var(--border);
     padding:6px;
     cursor:pointer;
     background:white;
     touch-action:none;
     user-select:none;
+    overflow:hidden;
 }
 
 .day:hover{
