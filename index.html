@@ -1873,6 +1873,23 @@ function loadJSON(key, fallback){
 let events =
     loadJSON("mindcal_events", []);
 
+    events = events.map(function(event) {
+    return normalizeEvent(event);
+});
+
+/*
+   Upgrade existing events to the new event
+   structure without deleting or changing
+   their existing information.
+*/
+events =
+    events.map(function(event){
+
+        return normalizeEvent(event);
+
+    });
+    
+saveEvents();
 
 let brainDump =
     safeStorageGet(
@@ -1943,7 +1960,33 @@ const brainDumpBox =
 
 brainDumpBox.value = brainDump;
 
+/* =========================================
+   EVENT / SERIES ID HELPERS
+========================================= */
 
+function createEventId(){
+    return (
+        "event-" +
+        Date.now().toString(36) +
+        "-" +
+        Math.random()
+            .toString(36)
+            .slice(2,8)
+    );
+}
+
+
+function createSeriesId(){
+    return (
+        "series-" +
+        Date.now().toString(36) +
+        "-" +
+        Math.random()
+            .toString(36)
+            .slice(2,8)
+    );
+}
+    
 /* =========================================
    DATE FUNCTION
 ========================================= */
@@ -1967,7 +2010,94 @@ function getDateKey(date){
 
 }
 
+/* =========================================
+   EVENT DATA NORMALIZATION
+   Adds the newer series fields to both
+   old and new events.
+========================================= */
 
+function normalizeEvent(event){
+
+    if(!event.id){
+        event.id = createEventId();
+    }
+
+    /*
+       Every event gets a seriesId.
+
+       Non-repeating events technically have
+       their own private series, which gives us
+       a consistent data structure later.
+    */
+    if(!event.seriesId){
+        event.seriesId = createSeriesId();
+    }
+
+    /*
+       A repeating event is the master of its
+       series unless it is explicitly marked
+       otherwise.
+    */
+    if(
+        typeof event.isSeriesMaster !== "boolean"
+    ){
+        event.isSeriesMaster =
+            event.repeat &&
+            event.repeat !== "none";
+    }
+
+    /*
+       Exceptions are stored by occurrence date.
+
+       Example:
+
+       exceptions: {
+           "2026-09-14": {
+               cancelled:true
+           }
+       }
+    */
+    if(
+        !event.exceptions ||
+        typeof event.exceptions !== "object" ||
+        Array.isArray(event.exceptions)
+    ){
+        event.exceptions = {};
+    }
+
+    return event;
+}
+
+    /* =========================================
+   SERIES EXCEPTION HELPERS
+========================================= */
+
+function setOccurrenceException(
+    event,
+    occurrenceDate,
+    exception
+) {
+
+    normalizeEvent(event);
+
+    event.exceptions[occurrenceDate] = {
+        ...exception
+    };
+
+    return event.exceptions[occurrenceDate];
+}
+
+
+function removeOccurrenceException(
+    event,
+    occurrenceDate
+) {
+
+    normalizeEvent(event);
+
+    delete event.exceptions[occurrenceDate];
+}
+    
 /* =========================================
    SAVE DATA
 ========================================= */
@@ -5701,6 +5831,83 @@ if(endDate < startDate){
 
             if(event){
 
+    normalizeEvent(event);
+
+                /* =========================================
+   SERIES HELPERS
+========================================= */
+
+function isRepeatingEvent(event){
+
+    return (
+        event &&
+        event.repeat &&
+        event.repeat !== "none"
+    );
+
+}
+
+
+function getSeriesEvents(seriesId){
+
+    return events.filter(function(event){
+
+        return event.seriesId === seriesId;
+
+    });
+
+}
+
+
+function getSeriesMaster(seriesId){
+
+    return events.find(function(event){
+
+        return (
+            event.seriesId === seriesId &&
+            event.isSeriesMaster === true
+        );
+
+    }) || null;
+
+}
+
+
+function hasOccurrenceException(
+    event,
+    occurrenceDate
+){
+
+    return !!(
+        event &&
+        event.exceptions &&
+        event.exceptions[occurrenceDate]
+    );
+
+}
+
+
+function getOccurrenceException(
+    event,
+    occurrenceDate
+){
+
+    if(
+        !event ||
+        !event.exceptions
+    ){
+
+        return null;
+
+    }
+
+    return (
+        event.exceptions[occurrenceDate] ||
+        null
+    );
+
+}
+
                 event.title =
                     title;
 
@@ -5805,11 +6012,20 @@ currentDate =
 
         const newEvent = {
 
-            id:
-                Date.now().toString(),
+    id:
+        createEventId(),
 
-            title:
-                title,
+    seriesId:
+        createSeriesId(),
+
+    isSeriesMaster:
+        selectedRepeat !== "none",
+
+    exceptions:
+        {},
+
+    title:
+        title,
 
             category:
                 document.getElementById(
