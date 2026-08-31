@@ -4375,16 +4375,12 @@ function renderEvents(){
         getEventsForDate(key);
 
 
-    /* Automatic prioritization: Must Get Done
-       first, then Could Get Done, then
-       everything else. Ties keep their
-       original relative order. */
+    /* Automatically arrange events:
+   earliest time first,
+   priority breaks ties,
+   then earlier ending time. */
 
-    dayEvents.sort(function(a,b){
-
-        return getPriorityRank(a) - getPriorityRank(b);
-
-    });
+dayEvents.sort(compareEvents);
 
 
     if(
