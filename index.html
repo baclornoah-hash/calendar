@@ -6,6 +6,18 @@
 
 <title>MindCal</title>
 
+    .habit-table tr[draggable="true"] {
+    cursor: grab;
+}
+
+.habit-table tr[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.habit-table tr.habit-dragging {
+    opacity: 0.45;
+}
+    
 <style>
 
 :root{
@@ -2120,6 +2132,16 @@ function saveHabits(){
 
 }
 
+    function normalizeHabitOrder(){
+
+    habits.forEach(function(habit,index){
+
+        habit.order = index;
+
+    });
+
+}
+
 function saveHabitLog(){
 
     safeStorageSet(
@@ -2284,9 +2306,7 @@ function renderCalendar(){
         const dayEvents =
             getEventsForDate(key);
 
-        dayEvents.sort(function(a,b){
-            return getPriorityRank(a) - getPriorityRank(b);
-        });
+        dayEvents.sort(compareEvents);
 
 
         dayEvents
@@ -3312,16 +3332,19 @@ function renderHabitTracker(){
 
             habits.push({
 
-                id:
-                    Date.now().toString(),
+    id:
+        Date.now().toString(),
 
-                name:
-                    name,
+    name:
+        name,
 
-                emoji:
-                    emojiInput.value
+    emoji:
+        emojiInput.value,
 
-            });
+    order:
+        habits.length
+
+});
 
             saveHabits();
 
@@ -3425,18 +3448,171 @@ function renderHabitTracker(){
         document.createElement("tbody");
 
 
-    habits.forEach(
-        function(habit){
+    normalizeHabitOrder();
+
+habits
+.sort(function(a,b){
+
+    return (
+        (a.order ?? 0) -
+        (b.order ?? 0)
+    );
+
+})
+.forEach(
+    function(habit){
 
             const row =
                 document.createElement("tr");
 
+        row.draggable = true;
 
+row.dataset.habitId =
+    habit.id;
+
+row.addEventListener(
+    "dragstart",
+    function(e){
+
+        /*
+         * Do not start dragging if the user
+         * is interacting with a checkbox.
+         */
+        if(
+            e.target.closest(".habit-check")
+        ){
+
+            e.preventDefault();
+
+            return;
+
+        }
+
+
+        /*
+         * Do not start dragging if the user
+         * is interacting with the delete button.
+         */
+        if(
+            e.target.closest(".habit-delete")
+        ){
+
+            e.preventDefault();
+
+            return;
+
+        }
+
+
+        /*
+         * Everything is okay.
+         * Start dragging the habit.
+         */
+        row.classList.add(
+            "habit-dragging"
+        );
+
+
+        window.draggedHabitId =
+            habit.id;
+
+    }
+);
+
+
+row.addEventListener(
+    "dragend",
+    function(){
+
+        row.classList.remove(
+            "habit-dragging"
+        );
+
+        window.draggedHabitId =
+            null;
+
+    }
+);
+
+
+row.addEventListener(
+    "dragover",
+    function(e){
+
+        e.preventDefault();
+
+    }
+);
+
+
+row.addEventListener(
+    "drop",
+    function(e){
+
+        e.preventDefault();
+
+        const draggedId =
+            window.draggedHabitId;
+
+        if(
+            !draggedId ||
+            draggedId === habit.id
+        ){
+            return;
+        }
+
+
+        const fromIndex =
+            habits.findIndex(
+                function(h){
+                    return h.id === draggedId;
+                }
+            );
+
+
+        const toIndex =
+            habits.findIndex(
+                function(h){
+                    return h.id === habit.id;
+                }
+            );
+
+
+        if(
+            fromIndex === -1 ||
+            toIndex === -1
+        ){
+            return;
+        }
+
+
+        const movedHabit =
+            habits.splice(
+                fromIndex,
+                1
+            )[0];
+
+
+        habits.splice(
+            toIndex,
+            0,
+            movedHabit
+        );
+
+
+        normalizeHabitOrder();
+
+        saveHabits();
+
+        renderHabitTracker();
+
+    }
+);
             const nameCell =
                 document.createElement("td");
 
             nameCell.className =
-                "habit-name-cell";
+    "habit-name-cell habit-drag-handle";
 
             nameCell.innerHTML =
                 escapeHTML(habit.emoji) +
@@ -4009,6 +4185,136 @@ function getPriorityRank(event){
     }
 
     return 2;
+
+}
+
+function getEventTimeRank(event){
+
+    /*
+       All-day events come first.
+    */
+    if(event.timeType === "all-day"){
+        return 0;
+    }
+
+    /*
+       Specific times use their actual start time.
+    */
+    if(
+        event.timeType === "specific" &&
+        event.start
+    ){
+
+        const parts =
+            event.start.split(":");
+
+        const hours =
+            Number(parts[0]);
+
+        const minutes =
+            Number(parts[1]);
+
+        return (
+            1 +
+            hours * 60 +
+            minutes
+        );
+
+    }
+
+    /*
+       Flexible time periods receive approximate
+       positions so they still have a natural order.
+    */
+    if(event.timeType === "morning"){
+        return 1 + (6 * 60);
+    }
+
+    if(event.timeType === "afternoon"){
+        return 1 + (12 * 60);
+    }
+
+    if(event.timeType === "evening"){
+        return 1 + (17 * 60);
+    }
+
+    if(event.timeType === "night"){
+        return 1 + (20 * 60);
+    }
+
+    /*
+       Anytime / flexible goes last.
+    */
+    if(event.timeType === "flexible"){
+        return 1 + (24 * 60);
+    }
+
+    /*
+       Fallback.
+    */
+    return 1 + (24 * 60);
+}
+
+
+function compareEvents(a,b){
+
+    /*
+       1. EARLIEST TIME FIRST
+    */
+    const timeDifference =
+        getEventTimeRank(a) -
+        getEventTimeRank(b);
+
+    if(timeDifference !== 0){
+        return timeDifference;
+    }
+
+
+    /*
+       2. IF SAME TIME:
+       Must → Could → None
+    */
+    const priorityDifference =
+        getPriorityRank(a) -
+        getPriorityRank(b);
+
+    if(priorityDifference !== 0){
+        return priorityDifference;
+    }
+
+
+    /*
+       3. IF SAME TIME AND PRIORITY:
+       Earlier ending event first.
+    */
+    if(a.end && b.end){
+
+        const aEnd =
+            a.end.split(":");
+
+        const bEnd =
+            b.end.split(":");
+
+        const aMinutes =
+            Number(aEnd[0]) * 60 +
+            Number(aEnd[1]);
+
+        const bMinutes =
+            Number(bEnd[0]) * 60 +
+            Number(bEnd[1]);
+
+        if(aMinutes !== bMinutes){
+            return aMinutes - bMinutes;
+        }
+
+    }
+
+
+    /*
+       4. Keep original order if everything
+       else is identical.
+    */
+    return 0;
 
 }
 
