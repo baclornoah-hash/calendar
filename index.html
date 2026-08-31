@@ -5,18 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>MindCal</title>
-
-    .habit-table tr[draggable="true"] {
-    cursor: grab;
-}
-
-.habit-table tr[draggable="true"]:active {
-    cursor: grabbing;
-}
-
-.habit-table tr.habit-dragging {
-    opacity: 0.45;
-}
     
 <style>
 
@@ -900,6 +888,27 @@ textarea{
     position:sticky;
     left:0;
     z-index:2;
+}
+
+    .habit-table tr[draggable="true"] {
+    cursor: grab;
+}
+
+.habit-table tr[draggable="true"]:active {
+    cursor: grabbing;
+}
+
+.habit-drag-handle {
+    cursor: grab;
+    user-select: none;
+}
+
+.habit-drag-handle:active {
+    cursor: grabbing;
+}
+
+.habit-table tr.habit-dragging {
+    opacity: 0.45;
 }
 
 .habit-check{
