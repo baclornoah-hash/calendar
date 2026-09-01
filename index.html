@@ -4141,15 +4141,18 @@ function getEventsForDate(date){
 
         if(event.repeat === "weekly"){
 
-            const difference =
-                Math.floor(
-                    (current - start) / 86400000
-                );
+    const difference =
+        Math.floor(
+            (current - start) / 86400000
+        );
 
-            return difference >= 0 &&
-                   difference % 7 === 0;
+    return (
+        current >= start &&
+        current <= end &&
+        difference % 7 === 0
+    );
 
-        }
+}
 
         /* =========================
            MONTHLY
@@ -4157,13 +4160,26 @@ function getEventsForDate(date){
 
         if(event.repeat === "monthly"){
 
-            return (
-                current >= start &&
-                current.getDate() ===
-                start.getDate()
-            );
+    if(current < start || current > end){
+        return false;
+    }
 
-        }
+    const lastDayOfMonth =
+        new Date(
+            current.getFullYear(),
+            current.getMonth() + 1,
+            0
+        ).getDate();
+
+    const targetDay =
+        Math.min(
+            start.getDate(),
+            lastDayOfMonth
+        );
+
+    return current.getDate() === targetDay;
+
+}
 
            /* =========================
    YEARLY
@@ -4173,14 +4189,12 @@ if(event.repeat === "yearly"){
 
     return (
         current >= start &&
-        current.getMonth() ===
-        start.getMonth() &&
-        current.getDate() ===
-        start.getDate()
+        current <= end &&
+        current.getMonth() === start.getMonth() &&
+        current.getDate() === start.getDate()
     );
 
 }
-
 
         /* =========================
            CUSTOM
