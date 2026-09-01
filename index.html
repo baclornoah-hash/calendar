@@ -4188,33 +4188,64 @@ function getEventsForDate(date){
 ========================= */
 
 if(event.repeat === "yearly"){
+if(event.repeat === "yearly"){
 
-    if(
-        event.category === "Birthday"
-    ){
+    const isBirthday =
+        event.category === "Birthday";
 
-        return (
-            current >= start &&
-            current.getMonth() ===
-                start.getMonth() &&
-            current.getDate() ===
+    const isLeapDay =
+        start.getMonth() === 1 &&
+        start.getDate() === 29;
+
+    if(isLeapDay){
+
+        const isLeapYear =
+            new Date(
+                current.getFullYear(),
+                1,
+                29
+            ).getMonth() === 1;
+
+        const correctBirthdayDate =
+            isLeapYear
+                ? (
+                    current.getMonth() === 1 &&
+                    current.getDate() === 29
+                )
+                : (
+                    current.getMonth() === 1 &&
+                    current.getDate() === 28
+                );
+
+        if(!correctBirthdayDate){
+            return false;
+        }
+
+    }else{
+
+        if(
+            current.getMonth() !==
+                start.getMonth() ||
+            current.getDate() !==
                 start.getDate()
-        );
+        ){
+            return false;
+        }
+
+    }
+
+    if(isBirthday){
+
+        return current >= start;
 
     }
 
     return (
         current >= start &&
-        current <= end &&
-        current.getMonth() ===
-            start.getMonth() &&
-        current.getDate() ===
-            start.getDate()
+        current <= end
     );
 
 }
-
-
         /* =========================
            CUSTOM
         ========================= */
