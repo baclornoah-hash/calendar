@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">- 
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>MindCal</title>
-    f
+
 <style>
 
 :root{
@@ -456,11 +456,6 @@ textarea{
         border-radius:14px;
     }
 
-    /* Calendar top bar: title gets its own
-       centered row, nav + Today sit below it
-       with room to breathe instead of being
-       squeezed into wrapping mid-button. */
-
     .calendar-top{
         flex-wrap:wrap;
         row-gap:10px;
@@ -486,9 +481,6 @@ textarea{
     #todayButton{
         min-height:40px;
     }
-
-    /* View switcher: wrap instead of
-       squeezing four buttons into one row. */
 
     .view-switcher{
         flex-wrap:wrap;
@@ -524,18 +516,11 @@ textarea{
         padding:3px;
     }
 
-    /* Bigger, easier-to-tap action buttons
-       on event cards. */
-
     .actions button{
         min-height:36px;
         padding:8px 10px;
         font-size:12px;
     }
-
-    /* Habit tracker: slightly larger check
-       cells so they're easier to tap, and a
-       modal-friendly add-habit row. */
 
     .habit-check{
         width:26px;
@@ -550,10 +535,6 @@ textarea{
     .habit-add-row select{
         width:100%;
     }
-
-    /* Week/Day hourly grid: narrower time
-       column frees up room for the actual
-       schedule on a small screen. */
 
     .week-calendar{
         grid-template-columns:52px repeat(7, minmax(70px, 1fr));
@@ -578,9 +559,6 @@ textarea{
         padding:3px;
     }
 
-    /* Modal: less padding, no wasted space
-       around the edges on a small screen. */
-
     .modal{
         padding:8px;
     }
@@ -594,9 +572,6 @@ textarea{
     select,
     textarea{
         font-size:16px;
-        /* 16px prevents iOS Safari from
-           automatically zooming in when a
-           field is focused. */
     }
 
     .save-event,
@@ -1821,19 +1796,6 @@ textarea{
 
 /* =========================================
    SAFE STORAGE
-   Some browsers/contexts (Safari on file://
-   pages, sandboxed previews, some in-app
-   webviews) throw a SecurityError just for
-   touching localStorage. Since that would
-   happen as the very first thing this script
-   does, an uncaught throw here would stop
-   every line below it from ever running —
-   including every addEventListener call —
-   which is why every button would stop
-   working at once. These wrappers make sure
-   that can never happen: the app just runs
-   without persistence instead of not running
-   at all.
 ========================================= */
 
 function safeStorageGet(key){
@@ -1858,10 +1820,6 @@ function safeStorageSet(key, value){
         localStorage.setItem(key, value);
 
     }catch(e){
-
-        /* Storage unavailable — data won't
-           persist across reloads, but the
-           app keeps working this session. */
 
     }
 
@@ -1889,28 +1847,207 @@ function loadJSON(key, fallback){
 
 
 /* =========================================
+   EVENT / SERIES ID HELPERS
+========================================= */
+
+function createEventId(){
+    return (
+        "event-" +
+        Date.now().toString(36) +
+        "-" +
+        Math.random()
+            .toString(36)
+            .slice(2,8)
+    );
+}
+
+
+function createSeriesId(){
+    return (
+        "series-" +
+        Date.now().toString(36) +
+        "-" +
+        Math.random()
+            .toString(36)
+            .slice(2,8)
+    );
+}
+
+/* =========================================
+   DATE FUNCTION
+========================================= */
+
+function getDateKey(date){
+
+    let year =
+        date.getFullYear();
+
+    let month =
+        String(
+            date.getMonth() + 1
+        ).padStart(2,"0");
+
+    let day =
+        String(
+            date.getDate()
+        ).padStart(2,"0");
+
+    return `${year}-${month}-${day}`;
+
+}
+
+/* =========================================
+   EVENT DATA NORMALIZATION
+========================================= */
+
+function normalizeEvent(event){
+
+    if(!event.id){
+        event.id = createEventId();
+    }
+
+    if(!event.seriesId){
+        event.seriesId = createSeriesId();
+    }
+
+    if(
+        typeof event.isSeriesMaster !== "boolean"
+    ){
+        event.isSeriesMaster =
+            event.repeat &&
+            event.repeat !== "none";
+    }
+
+    if(
+        !event.exceptions ||
+        typeof event.exceptions !== "object" ||
+        Array.isArray(event.exceptions)
+    ){
+        event.exceptions = {};
+    }
+
+    return event;
+}
+
+/* =========================================
+   SERIES EXCEPTION HELPERS
+========================================= */
+
+function setOccurrenceException(
+    event,
+    occurrenceDate,
+    exception
+) {
+
+    normalizeEvent(event);
+
+    event.exceptions[occurrenceDate] = {
+        ...exception
+    };
+
+    return event.exceptions[occurrenceDate];
+}
+
+
+function removeOccurrenceException(
+    event,
+    occurrenceDate
+) {
+
+    normalizeEvent(event);
+
+    delete event.exceptions[occurrenceDate];
+}
+
+/* =========================================
+   SERIES HELPERS
+========================================= */
+
+function isRepeatingEvent(event){
+
+    return (
+        event &&
+        event.repeat &&
+        event.repeat !== "none"
+    );
+
+}
+
+
+function getSeriesEvents(seriesId){
+
+    return events.filter(function(event){
+
+        return event.seriesId === seriesId;
+
+    });
+
+}
+
+
+function getSeriesMaster(seriesId){
+
+    return events.find(function(event){
+
+        return (
+            event.seriesId === seriesId &&
+            event.isSeriesMaster === true
+        );
+
+    }) || null;
+
+}
+
+
+function hasOccurrenceException(
+    event,
+    occurrenceDate
+){
+
+    return !!(
+        event &&
+        event.exceptions &&
+        event.exceptions[occurrenceDate]
+    );
+
+}
+
+
+function getOccurrenceException(
+    event,
+    occurrenceDate
+){
+
+    if(
+        !event ||
+        !event.exceptions
+    ){
+
+        return null;
+
+    }
+
+    return (
+        event.exceptions[occurrenceDate] ||
+        null
+    );
+
+}
+
+/* =========================================
    DATA
 ========================================= */
 
 let events =
     loadJSON("mindcal_events", []);
 
-    events = events.map(function(event) {
-    return normalizeEvent(event);
-});
-
-/*
-   Upgrade existing events to the new event
-   structure without deleting or changing
-   their existing information.
-*/
 events =
     events.map(function(event){
 
         return normalizeEvent(event);
 
     });
-    
+
 saveEvents();
 
 let brainDump =
@@ -1982,144 +2119,6 @@ const brainDumpBox =
 
 brainDumpBox.value = brainDump;
 
-/* =========================================
-   EVENT / SERIES ID HELPERS
-========================================= */
-
-function createEventId(){
-    return (
-        "event-" +
-        Date.now().toString(36) +
-        "-" +
-        Math.random()
-            .toString(36)
-            .slice(2,8)
-    );
-}
-
-
-function createSeriesId(){
-    return (
-        "series-" +
-        Date.now().toString(36) +
-        "-" +
-        Math.random()
-            .toString(36)
-            .slice(2,8)
-    );
-}
-    
-/* =========================================
-   DATE FUNCTION
-========================================= */
-
-function getDateKey(date){
-
-    let year =
-        date.getFullYear();
-
-    let month =
-        String(
-            date.getMonth() + 1
-        ).padStart(2,"0");
-
-    let day =
-        String(
-            date.getDate()
-        ).padStart(2,"0");
-
-    return `${year}-${month}-${day}`;
-
-}
-
-/* =========================================
-   EVENT DATA NORMALIZATION
-   Adds the newer series fields to both
-   old and new events.
-========================================= */
-
-function normalizeEvent(event){
-
-    if(!event.id){
-        event.id = createEventId();
-    }
-
-    /*
-       Every event gets a seriesId.
-
-       Non-repeating events technically have
-       their own private series, which gives us
-       a consistent data structure later.
-    */
-    if(!event.seriesId){
-        event.seriesId = createSeriesId();
-    }
-
-    /*
-       A repeating event is the master of its
-       series unless it is explicitly marked
-       otherwise.
-    */
-    if(
-        typeof event.isSeriesMaster !== "boolean"
-    ){
-        event.isSeriesMaster =
-            event.repeat &&
-            event.repeat !== "none";
-    }
-
-    /*
-       Exceptions are stored by occurrence date.
-
-       Example:
-
-       exceptions: {
-           "2026-09-14": {
-               cancelled:true
-           }
-       }
-    */
-    if(
-        !event.exceptions ||
-        typeof event.exceptions !== "object" ||
-        Array.isArray(event.exceptions)
-    ){
-        event.exceptions = {};
-    }
-
-    return event;
-}
-
-    /* =========================================
-   SERIES EXCEPTION HELPERS
-========================================= */
-
-function setOccurrenceException(
-    event,
-    occurrenceDate,
-    exception
-) {
-
-    normalizeEvent(event);
-
-    event.exceptions[occurrenceDate] = {
-        ...exception
-    };
-
-    return event.exceptions[occurrenceDate];
-}
-
-
-function removeOccurrenceException(
-    event,
-    occurrenceDate
-) {
-
-    normalizeEvent(event);
-
-    delete event.exceptions[occurrenceDate];
-}
-    
 /* =========================================
    SAVE DATA
 ========================================= */
@@ -2774,15 +2773,6 @@ function renderWeekCalendar(){
             dayEvents.forEach(
                 function(event){
 
-                    /*
-                       Only show specific-time
-                       events in the hourly grid —
-                       Morning/Afternoon/Evening/
-                       Night/Anytime/All Day events
-                       live in their own dedicated
-                       sections above.
-                    */
-
                     if(
                         event.timeType !== "specific" ||
                         !event.start
@@ -3144,11 +3134,6 @@ function renderDayCalendar(){
         dayEvents.forEach(
             function(event){
 
-                /*
-                   Only show specific-time
-                   events in the hourly grid.
-                */
-
                 if(
                     event.timeType !== "specific" ||
                     !event.start
@@ -3484,10 +3469,6 @@ row.addEventListener(
     "dragstart",
     function(e){
 
-        /*
-         * Do not start dragging if the user
-         * is interacting with a checkbox.
-         */
         if(
             e.target.closest(".habit-check")
         ){
@@ -3499,10 +3480,6 @@ row.addEventListener(
         }
 
 
-        /*
-         * Do not start dragging if the user
-         * is interacting with the delete button.
-         */
         if(
             e.target.closest(".habit-delete")
         ){
@@ -3514,10 +3491,6 @@ row.addEventListener(
         }
 
 
-        /*
-         * Everything is okay.
-         * Start dragging the habit.
-         */
         row.classList.add(
             "habit-dragging"
         );
@@ -3762,16 +3735,6 @@ row.addEventListener(
 
     /* HABIT CHECKLIST SECTION */
 
-const checklistSection =
-    document.createElement("div");
-
-checklistSection.className =
-    "habit-checklist-section";
-
-checklistSection.appendChild(
-    table
-);
-
 const tableWrapper =
     document.createElement("div");
 
@@ -3865,7 +3828,7 @@ habitTracker.appendChild(
 
 /* DAILY PROGRESS CHART */
 
-const  =
+const progressSection =
     document.createElement("div");
 
 progressSection.className =
@@ -3873,7 +3836,7 @@ progressSection.className =
 
 
 /* =========================
-   FIRST DAILY PROGRESS CHART
+   DAILY PROGRESS CHART
    Individual days
 ========================= */
 
@@ -3973,7 +3936,7 @@ progressSection.appendChild(
 
 
 /* =========================
-   SECOND DAILY PROGRESS CHART
+   WEEKLY PROGRESS CHART
    Five weekly periods
 ========================= */
 
@@ -3987,158 +3950,7 @@ progressTitle2.style.marginTop =
     "25px";
 
 progressTitle2.textContent =
-    "📊 Daily Progress";
-
-progressSection.appendChild(
-    progressTitle2
-);
-
-
-const weeklyChart =
-    document.createElement("div");
-
-weeklyChart.className =
-    "habit-progress-chart";
-
-
-const dailyPercentages = [];
-
-
-/* Calculate daily percentages first */
-
-for(
-    let day = 1;
-    day <= daysInMonth;
-    day++
-){
-
-    const dateKey =
-        getDateKey(
-            new Date(
-                year,
-                month,
-                day
-            )
-        );
-
-    let doneCount = 0;
-
-
-    habits.forEach(
-        function(habit){
-
-            if(
-                habitLog[habit.id] &&
-                habitLog[habit.id][dateKey]
-            ){
-
-                doneCount++;
-
-            }
-
-        }
-    );
-
-
-    const percent =
-        habits.length
-        ? Math.round(
-            (doneCount / habits.length) * 100
-          )
-        : 0;
-
-
-    dailyPercentages.push(
-        percent
-    );
-
-}
-
-
-/* Create five weekly periods */
-
-for(
-    let week = 0;
-    week < 5;
-    week++
-){
-
-    const start =
-        week * 7;
-
-    const end =
-        Math.min(
-            start + 7,
-            dailyPercentages.length
-        );
-
-
-    if(
-        start >= end
-    ){
-
-        break;
-
-    }
-
-
-    const weekDays =
-        dailyPercentages.slice(
-            start,
-            end
-        );
-
-
-    const weekTotal =
-        weekDays.reduce(
-            function(
-                sum,
-                value
-            ){
-
-                return (
-                    sum +
-                    value
-                );
-
-            },
-            0
-        );
-
-
-    const weekPercent =
-        Math.round(
-            weekTotal /
-            weekDays.length
-        );
-
-
-    const bar =
-        document.createElement("div");
-
-    bar.className =
-        "habit-progress-bar";
-
-    bar.style.height =
-        Math.max(
-            weekPercent,
-
-/* =========================
-   SECOND DAILY PROGRESS CHART
-   Five weekly periods
-========================= */
-
-const progressTitle2 =
-    document.createElement("div");
-
-progressTitle2.className =
-    "habit-progress-title";
-
-progressTitle2.style.marginTop =
-    "25px";
-
-progressTitle2.textContent =
-    "📊 Daily Progress";
+    "📊 Weekly Progress";
 
 progressSection.appendChild(
     progressTitle2
@@ -4166,6 +3978,10 @@ for(
             startDay + 6,
             daysInMonth
         );
+
+    if(startDay > daysInMonth){
+        break;
+    }
 
 
     let totalPercent = 0;
@@ -4236,7 +4052,46 @@ for(
             totalPercent /
             numberOfDays
         );
-    
+
+
+    const bar =
+        document.createElement("div");
+
+    bar.className =
+        "habit-progress-bar";
+
+    bar.style.height =
+        Math.max(
+            weekPercent,
+            2
+        ) + "%";
+
+    bar.title =
+        "Week " +
+        (week + 1) +
+        ": " +
+        weekPercent +
+        "%";
+
+
+    weeklyChart.appendChild(
+        bar
+    );
+
+}
+
+
+progressSection.appendChild(
+    weeklyChart
+);
+
+
+habitTracker.appendChild(
+    progressSection
+);
+
+}
+
 /* =========================================
    GET EVENTS
 ========================================= */
@@ -4253,23 +4108,52 @@ function getEventsForDate(date){
                 event.startDate + "T00:00:00"
             );
 
+        const end =
+            new Date(
+                event.endDate + "T00:00:00"
+            );
+
+        /* =========================
+           NON-REPEATING
+        ========================= */
+
+        if(
+            !event.repeat ||
+            event.repeat === "none"
+        ){
+
+            return (
+                current >= start &&
+                current <= end
+            );
+
+        }
+
+        /* =========================
+           DAILY
+        ========================= */
+
+        if(event.repeat === "daily"){
+
+            return current >= start;
+
+        }
+
+        /* =========================
+           WEEKLY
+        ========================= */
+
         if(event.repeat === "weekly"){
 
-    const difference =
-        Math.floor(
-            (current - start) / 86400000
-        );
+            const difference =
+                Math.floor(
+                    (current - start) / 86400000
+                );
 
-    return difference >= 0 &&
-           difference % 7 === 0;
+            return difference >= 0 &&
+                   difference % 7 === 0;
 
-}
-
-const end =
-    new Date(
-        event.endDate + "T00:00:00"
-    );
-
+        }
 
         /* =========================
            MONTHLY
@@ -4278,6 +4162,7 @@ const end =
         if(event.repeat === "monthly"){
 
             return (
+                current >= start &&
                 current.getDate() ===
                 start.getDate()
             );
@@ -4291,6 +4176,7 @@ const end =
 if(event.repeat === "yearly"){
 
     return (
+        current >= start &&
         current.getMonth() ===
         start.getMonth() &&
         current.getDate() ===
@@ -4325,6 +4211,10 @@ if(event.repeat === "yearly"){
 
                 return false;
 
+            }
+
+            if(current < start){
+                return false;
             }
 
 
@@ -4406,10 +4296,6 @@ if(event.repeat === "yearly"){
 
 }
 
-
-/* =========================================
-   RENDER EVENT LIST
-========================================= */
 
 /* =========================================
    PRIORITY HELPERS
@@ -4574,6 +4460,10 @@ function getPriorityLabel(priority){
 
 }
 
+
+/* =========================================
+   RENDER EVENT LIST
+========================================= */
 
 function renderEvents(){
 
@@ -4997,15 +4887,6 @@ function closeModal(){
 
 /* =========================================
    DRAG TO SCHEDULE
-   (multi-day drag in Month View,
-   multi-hour drag in Week/Day View)
-
-   Uses classic mouse events (mousedown /
-   mouseenter / mouseup) for desktop and
-   classic touch events (touchstart /
-   touchmove / touchend) for mobile,
-   rather than the Pointer Events API,
-   for the widest possible compatibility.
 ========================================= */
 
 let isDragging = false;
@@ -5227,9 +5108,7 @@ function clearHourDragHighlight(){
 
 
 /* MOUSE: track cursor movement across cells
-   via elementFromPoint, mirroring the touch
-   handling below (this was previously    missing, which is why dragging didn't
-   extend the selection for mouse users). */
+   via elementFromPoint */
 
 document.addEventListener(
     "mousemove",
@@ -5294,9 +5173,7 @@ document.addEventListener(
 
 
 /* TOUCH: track finger movement across
-   cells via elementFromPoint, since touch
-   doesn't fire mouseenter/mouseover on
-   cells other than the one it started on. */
+   cells via elementFromPoint */
 
 document.addEventListener(
     "touchmove",
@@ -6012,6 +5889,8 @@ const repeatEndType =
 
 const repeatEndDateGroup =
     document.getElementById(
+        const repeatEndDateGroup =
+    document.getElementById(
         "repeatEndDateGroup"
     );
 
@@ -6376,81 +6255,6 @@ if(endDate < startDate){
 
     normalizeEvent(event);
 
-                /* =========================================
-   SERIES HELPERS
-========================================= */
-
-function isRepeatingEvent(event){
-
-    return (
-        event &&
-        event.repeat &&
-        event.repeat !== "none"
-    );
-
-}
-
-
-function getSeriesEvents(seriesId){
-
-    return events.filter(function(event){
-
-        return event.seriesId === seriesId;
-
-    });
-
-}
-
-
-function getSeriesMaster(seriesId){
-
-    return events.find(function(event){
-
-        return (
-            event.seriesId === seriesId &&
-            event.isSeriesMaster === true
-        );
-
-    }) || null;
-
-}
-
-
-function hasOccurrenceException(
-    event,
-    occurrenceDate
-){
-
-    return !!(
-        event &&
-        event.exceptions &&
-        event.exceptions[occurrenceDate]
-    );
-
-}
-
-
-function getOccurrenceException(
-    event,
-    occurrenceDate
-){
-
-    if(
-        !event ||
-        !event.exceptions
-    ){
-
-        return null;
-
-    }
-
-    return (
-        event.exceptions[occurrenceDate] ||
-        null
-    );
-
-}
-
                 event.title =
                     title;
 
@@ -6670,9 +6474,7 @@ currentDate =
 
     }
 );
-
-
-/* =========================================
+    /* =========================================
    BRAIN DUMP
 ========================================= */
 
@@ -7127,11 +6929,8 @@ function findAvailableTime(
 
 
     return null;
-
 }
-
-
-/* =========================================
+    /* =========================================
    FORMAT TIME
 ========================================= */
 
@@ -7358,7 +7157,16 @@ function createSmartEvent(
     const newEvent = {
 
         id:
-            Date.now().toString(),
+            createEventId(),
+
+        seriesId:
+            createSeriesId(),
+
+        isSeriesMaster:
+            false,
+
+        exceptions:
+            {},
 
         title:
             title,
@@ -7471,5 +7279,3 @@ renderEvents();
 
 </body>
 </html>
-
-   
