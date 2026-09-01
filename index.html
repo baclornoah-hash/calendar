@@ -3864,93 +3864,308 @@ habitTracker.appendChild(
 );
 
 /* DAILY PROGRESS CHART */
-    const progressSection =
-        document.createElement("div");
 
-    progressSection.className =
-        "habit-progress-section";
+const progressSection =
+    document.createElement("div");
 
-    const progressTitle =
-        document.createElement("div");
-
-    progressTitle.className =
-        "habit-progress-title";
-
-    progressTitle.textContent =
-        "📊 Daily Progress";
-
-    progressSection.appendChild(
-        progressTitle
-    );
+progressSection.className =
+    "habit-progress-section";
 
 
-    const chart =
-        document.createElement("div");
+/* MAIN TITLE */
 
-    chart.className =
-        "habit-progress-chart";
+const progressTitle =
+    document.createElement("div");
+
+progressTitle.className =
+    "habit-progress-title";
+
+progressTitle.textContent =
+    "📊 Daily Progress";
+
+progressSection.appendChild(
+    progressTitle
+);
 
 
-    for(
-        let day = 1;
-        day <= daysInMonth;
-        day++
-    ){
+/* =========================
+   DAILY CHART
+========================= */
 
-        const dateKey =
-            getDateKey(
-                new Date(year, month, day)
-            );
+const dailyLabel =
+    document.createElement("div");
 
-        let doneCount = 0;
+dailyLabel.textContent =
+    "Daily";
 
-        habits.forEach(
-            function(habit){
+dailyLabel.style.fontWeight =
+    "bold";
 
-                if(
-                    habitLog[habit.id] &&
-                    habitLog[habit.id][dateKey]
-                ){
+dailyLabel.style.fontSize =
+    "13px";
 
-                    doneCount++;
+dailyLabel.style.marginBottom =
+    "8px";
 
-                }
+progressSection.appendChild(
+    dailyLabel
+);
+
+
+const dailyChart =
+    document.createElement("div");
+
+dailyChart.className =
+    "habit-progress-chart";
+
+
+for(
+    let day = 1;
+    day <= daysInMonth;
+    day++
+){
+
+    const dateKey =
+        getDateKey(
+            new Date(year, month, day)
+        );
+
+    let doneCount = 0;
+
+
+    habits.forEach(
+        function(habit){
+
+            if(
+                habitLog[habit.id] &&
+                habitLog[habit.id][dateKey]
+            ){
+
+                doneCount++;
 
             }
+
+        }
+    );
+
+
+    const percent =
+        habits.length
+        ? Math.round(
+            (doneCount / habits.length) * 100
+          )
+        : 0;
+
+
+    const bar =
+        document.createElement("div");
+
+    bar.className =
+        "habit-progress-bar";
+
+
+    bar.style.height =
+        Math.max(percent, 2) + "%";
+
+
+    bar.title =
+        "Day " +
+        day +
+        ": " +
+        percent +
+        "%";
+
+
+    dailyChart.appendChild(
+        bar
+    );
+
+}
+
+
+progressSection.appendChild(
+    dailyChart
+);
+
+
+/* =========================
+   WEEKLY CHART
+========================= */
+
+const weeklyLabel =
+    document.createElement("div");
+
+weeklyLabel.textContent =
+    "Weekly";
+
+weeklyLabel.style.fontWeight =
+    "bold";
+
+weeklyLabel.style.fontSize =
+    "13px";
+
+weeklyLabel.style.marginTop =
+    "22px";
+
+weeklyLabel.style.marginBottom =
+    "8px";
+
+progressSection.appendChild(
+    weeklyLabel
+);
+
+
+const weeklyChart =
+    document.createElement("div");
+
+weeklyChart.className =
+    "habit-progress-chart";
+
+
+/*
+   Store each day's percentage
+   so we can group them into weeks.
+*/
+
+const dailyPercentages = [];
+
+
+for(
+    let day = 1;
+    day <= daysInMonth;
+    day++
+){
+
+    const dateKey =
+        getDateKey(
+            new Date(year, month, day)
         );
 
-        const percent =
-            habits.length
-            ? Math.round(
-                (doneCount / habits.length) * 100
-              )
-            : 0;
+    let doneCount = 0;
 
-        const bar =
-            document.createElement("div");
 
-        bar.className =
-            "habit-progress-bar";
+    habits.forEach(
+        function(habit){
 
-        bar.style.height =
-            Math.max(percent, 2) + "%";
+            if(
+                habitLog[habit.id] &&
+                habitLog[habit.id][dateKey]
+            ){
 
-        bar.title =
-            "Day " + day + ": " + percent + "%";
+                doneCount++;
 
-        chart.appendChild(
-            bar
+            }
+
+        }
+    );
+
+
+    const percent =
+        habits.length
+        ? Math.round(
+            (doneCount / habits.length) * 100
+          )
+        : 0;
+
+
+    dailyPercentages.push(
+        percent
+    );
+
+}
+
+
+/*
+   Group the days into five
+   7-day periods.
+
+   Week 1 = days 1–7
+   Week 2 = days 8–14
+   Week 3 = days 15–21
+   Week 4 = days 22–28
+   Week 5 = remaining days
+*/
+
+for(
+    let week = 0;
+    week < 5;
+    week++
+){
+
+    const start =
+        week * 7;
+
+    const end =
+        Math.min(
+            start + 7,
+            dailyPercentages.length
         );
 
+
+    if(start >= end){
+        break;
     }
 
-    progressSection.appendChild(
-        chart
+
+    const weekDays =
+        dailyPercentages.slice(
+            start,
+            end
+        );
+
+
+    const weekTotal =
+        weekDays.reduce(
+            function(sum, value){
+                return sum + value;
+            },
+            0
+        );
+
+
+    const weekPercent =
+        Math.round(
+            weekTotal / weekDays.length
+        );
+
+
+    const bar =
+        document.createElement("div");
+
+    bar.className =
+        "habit-progress-bar";
+
+
+    bar.style.height =
+        Math.max(
+            weekPercent,
+            2
+        ) + "%";
+
+
+    bar.title =
+        "Week " +
+        (week + 1) +
+        ": " +
+        weekPercent +
+        "%";
+
+
+    weeklyChart.appendChild(
+        bar
     );
 
-    habitTracker.appendChild(
-        progressSection
-    );
+}
+
+
+progressSection.appendChild(
+    weeklyChart
+);
+
+
+habitTracker.appendChild(
+    progressSection
+);
 
 }
 
