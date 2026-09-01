@@ -4189,11 +4189,27 @@ function getEventsForDate(date){
 
 if(event.repeat === "yearly"){
 
+    if(
+        event.category === "Birthday"
+    ){
+
+        return (
+            current >= start &&
+            current.getMonth() ===
+                start.getMonth() &&
+            current.getDate() ===
+                start.getDate()
+        );
+
+    }
+
     return (
         current >= start &&
         current <= end &&
-        current.getMonth() === start.getMonth() &&
-        current.getDate() === start.getDate()
+        current.getMonth() ===
+            start.getMonth() &&
+        current.getDate() ===
+            start.getDate()
     );
 
 }
