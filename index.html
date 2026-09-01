@@ -3979,18 +3979,22 @@ function getEventsForDate(date){
                 event.startDate + "T00:00:00"
             );
 
-        const end =
-            new Date(
-         eat === "weekly"){
+        if(event.repeat === "weekly"){
 
-            const difference =
-                Math.floor(
-                    (current - start) / 86400000
-                );
+    const difference =
+        Math.floor(
+            (current - start) / 86400000
+        );
 
-            return difference % 7 === 0;
+    return difference >= 0 &&
+           difference % 7 === 0;
 
-        }
+}
+
+const end =
+    new Date(
+        event.endDate + "T00:00:00"
+    );
 
 
         /* =========================
