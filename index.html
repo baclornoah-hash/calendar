@@ -961,7 +961,12 @@ textarea{
     transition:height .2s ease;
 }
 
-
+.habit-progress-bar{
+    flex:1;
+    background:var(--baby);
+    border-radius:3px 3px 0 0;
+    min-width:6px;
+}
 
 .habit-empty{
     text-align:center;
@@ -4130,12 +4135,9 @@ function getEventsForDate(date){
 
         if(event.repeat === "daily"){
 
-    return (
-        current >= start &&
-        current <= end
-    );
+            return current >= start;
 
-}F
+        }
 
         /* =========================
            WEEKLY
@@ -4143,18 +4145,15 @@ function getEventsForDate(date){
 
         if(event.repeat === "weekly"){
 
-    const difference =
-        Math.floor(
-            (current - start) / 86400000
-        );
+            const difference =
+                Math.floor(
+                    (current - start) / 86400000
+                );
 
-    return (
-        current >= start &&
-        current <= end &&
-        difference % 7 === 0
-    );
+            return difference >= 0 &&
+                   difference % 7 === 0;
 
-}
+        }
 
         /* =========================
            MONTHLY
@@ -4162,26 +4161,13 @@ function getEventsForDate(date){
 
         if(event.repeat === "monthly"){
 
-    if(current < start || current > end){
-        return false;
-    }
+            return (
+                current >= start &&
+                current.getDate() ===
+                start.getDate()
+            );
 
-    const lastDayOfMonth =
-        new Date(
-            current.getFullYear(),
-            current.getMonth() + 1,
-            0
-        ).getDate();
-
-    const targetDay =
-        Math.min(
-            start.getDate(),
-            lastDayOfMonth
-        );
-
-    return current.getDate() === targetDay;
-
-}
+        }
 
            /* =========================
    YEARLY
@@ -4189,62 +4175,17 @@ function getEventsForDate(date){
 
 if(event.repeat === "yearly"){
 
-    const isBirthday =
-        event.category === "Birthday";
-
-    const isLeapDay =
-        start.getMonth() === 1 &&
-        start.getDate() === 29;
-
-    if(isLeapDay){
-
-        const isLeapYear =
-            new Date(
-                current.getFullYear(),
-                1,
-                29
-            ).getMonth() === 1;
-
-        const correctBirthdayDate =
-            isLeapYear
-                ? (
-                    current.getMonth() === 1 &&
-                    current.getDate() === 29
-                )
-                : (
-                    current.getMonth() === 1 &&
-                    current.getDate() === 28
-                );
-
-        if(!correctBirthdayDate){
-            return false;
-        }
-
-    }else{
-
-        if(
-            current.getMonth() !==
-                start.getMonth() ||
-            current.getDate() !==
-                start.getDate()
-        ){
-            return false;
-        }
-
-    }
-
-    if(isBirthday){
-
-        return current >= start;
-
-    }
-
     return (
         current >= start &&
-        current <= end
+        current.getMonth() ===
+        start.getMonth() &&
+        current.getDate() ===
+        start.getDate()
     );
 
 }
+
+
         /* =========================
            CUSTOM
         ========================= */
@@ -4282,72 +4223,76 @@ if(event.repeat === "yearly"){
             ========================= */
 
             if(
-    settings.endType ===
-    "date" &&
-    settings.endDate
-){
+                settings.endType === "date" &&
+                settings.endDate
+            ){
 
-    const customEnd =
-        new Date(
-            settings.endDate
-        );
+                const endDate =
+                    new Date(
+                        settings.endDate +
+                        "T00:00:00"
+                    );
 
-    customEnd.setHours(
-        23,
-        59,
-        59,
-        999
-    );
+                if(current > endDate){
+                    return false;
+                }
 
-    if(
-        current > customEnd
-    ){
-        return false;
-    }
-
-}
+            }
 
 
             /* =========================
                OCCURRENCES
             ========================= */
 
-            ifif(
-    settings.endType ===
-    "occurrences" &&
-    settings.occurrences
-){
+            if(
+                settings.endType ===
+                "occurrences" &&
+                settings.occurrences
+            ){
 
-    const occurrences =
-        Number(
-            settings.occurrences
-        );
+                const occurrences =
+                    Number(
+                        settings.occurrences
+                    );
 
-    let count = 0;
+                let count = 0;
 
-    const temp =
-        new Date(start);
+                const temp =
+                    new Date(start);
 
-    while(temp <= current){
-        if(
-            settings.days.includes(
-                temp.getDay()
-            )
-        ){
+                while(temp <= current){
 
-            count++;
+                    if(
+                        settings.days.includes(
+                            temp.getDay()
+                        )
+                    ){
+
+                        count++;
+
+                    }
+
+                    temp.setDate(
+                        temp.getDate() + 1
+                    );
+
+                }
+
+                if(count > occurrences){
+                    return false;
+                }
+
+            }
+
+
+            return true;
 
         }
 
-        temp.setDate(
-            temp.getDate() + 1
-        );
 
-    }
-
-    if(count > occurrences){
         return false;
-    }
+
+    });
 
 }
 
