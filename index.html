@@ -961,12 +961,7 @@ textarea{
     transition:height .2s ease;
 }
 
-.habit-progress-bar{
-    flex:1;
-    background:var(--baby);
-    border-radius:3px 3px 0 0;
-    min-width:6px;
-}
+
 
 .habit-empty{
     text-align:center;
@@ -4135,9 +4130,12 @@ function getEventsForDate(date){
 
         if(event.repeat === "daily"){
 
-            return current >= start;
+    return (
+        current >= start &&
+        current <= end
+    );
 
-        }
+}F
 
         /* =========================
            WEEKLY
@@ -4145,15 +4143,18 @@ function getEventsForDate(date){
 
         if(event.repeat === "weekly"){
 
-            const difference =
-                Math.floor(
-                    (current - start) / 86400000
-                );
+    const difference =
+        Math.floor(
+            (current - start) / 86400000
+        );
 
-            return difference >= 0 &&
-                   difference % 7 === 0;
+    return (
+        current >= start &&
+        current <= end &&
+        difference % 7 === 0
+    );
 
-        }
+}
 
         /* =========================
            MONTHLY
@@ -4161,13 +4162,26 @@ function getEventsForDate(date){
 
         if(event.repeat === "monthly"){
 
-            return (
-                current >= start &&
-                current.getDate() ===
-                start.getDate()
-            );
+    if(current < start || current > end){
+        return false;
+    }
 
-        }
+    const lastDayOfMonth =
+        new Date(
+            current.getFullYear(),
+            current.getMonth() + 1,
+            0
+        ).getDate();
+
+    const targetDay =
+        Math.min(
+            start.getDate(),
+            lastDayOfMonth
+        );
+
+    return current.getDate() === targetDay;
+
+}
 
            /* =========================
    YEARLY
@@ -4177,10 +4191,9 @@ if(event.repeat === "yearly"){
 
     return (
         current >= start &&
-        current.getMonth() ===
-        start.getMonth() &&
-        current.getDate() ===
-        start.getDate()
+        current <= end &&
+        current.getMonth() === start.getMonth() &&
+        current.getDate() === start.getDate()
     );
 
 }
@@ -4244,55 +4257,42 @@ if(event.repeat === "yearly"){
                OCCURRENCES
             ========================= */
 
-            if(
-                settings.endType ===
-                "occurrences" &&
-                settings.occurrences
-            ){
+            ifif(
+    settings.endType ===
+    "occurrences" &&
+    settings.occurrences
+){
 
-                const occurrences =
-                    Number(
-                        settings.occurrences
-                    );
+    const occurrences =
+        Number(
+            settings.occurrences
+        );
 
-                let count = 0;
+    let count = 0;
 
-                const temp =
-                    new Date(start);
+    const temp =
+        new Date(start);
 
-                while(temp <= current){
+    while(temp <= current){
+        if(
+            settings.days.includes(
+                temp.getDay()
+            )
+        ){
 
-                    if(
-                        settings.days.includes(
-                            temp.getDay()
-                        )
-                    ){
-
-                        count++;
-
-                    }
-
-                    temp.setDate(
-                        temp.getDate() + 1
-                    );
-
-                }
-
-                if(count > occurrences){
-                    return false;
-                }
-
-            }
-
-
-            return true;
+            count++;
 
         }
 
+        temp.setDate(
+            temp.getDate() + 1
+        );
 
+    }
+
+    if(count > occurrences){
         return false;
-
-    });
+    }
 
 }
 
