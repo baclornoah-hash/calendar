@@ -4236,21 +4236,30 @@ if(event.repeat === "yearly"){
             ========================= */
 
             if(
-                settings.endType === "date" &&
-                settings.endDate
-            ){
+    settings.endType ===
+    "date" &&
+    settings.endDate
+){
 
-                const endDate =
-                    new Date(
-                        settings.endDate +
-                        "T00:00:00"
-                    );
+    const customEnd =
+        new Date(
+            settings.endDate
+        );
 
-                if(current > endDate){
-                    return false;
-                }
+    customEnd.setHours(
+        23,
+        59,
+        59,
+        999
+    );
 
-            }
+    if(
+        current > customEnd
+    ){
+        return false;
+    }
+
+}
 
 
             /* =========================
