@@ -4128,9 +4128,12 @@ function getEventsForDate(date){
 
         if(event.repeat === "daily"){
 
-            return current >= start;
+    return (
+        current >= start &&
+        current <= end
+    );
 
-        }
+}
 
         /* =========================
            WEEKLY
