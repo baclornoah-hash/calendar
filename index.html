@@ -2759,83 +2759,12 @@ function renderWeekCalendar(){
                 hour;
 
 
-            /* EVENTS FOR THIS DAY */
-
-            const dayEvents =
-                getEventsForDate(dateKey);
-
-
-            dayEvents.forEach(
-                function(event){
-
-                    if(
-                        event.timeType !== "specific" ||
-                        !event.start
-                    ){
-
-                        return;
-
-                    }
-
-
-                    const eventHour =
-                        Number(
-                            event.start
-                                .split(":")[0]
-                        );
-
-
-                    if(eventHour !== hour){
-
-                        return;
-
-                    }
-
-
-                    const eventElement =
-                        document.createElement(
-                            "div"
-                        );
-
-                    eventElement.className =
-                        "week-event priority-" +
-                        (event.priority || "none");
-
-
-                    if(
-                        event.status ===
-                        "completed"
-                    ){
-
-                        eventElement.classList.add(
-                            "completed"
-                        );
-
-                    }
-
-
-                    if(
-                        event.status ===
-                        "cancelled"
-                    ){
-
-                        eventElement.classList.add(
-                            "cancelled"
-                        );
-
-                    }
-
-
-                    eventElement.textContent =
-                        event.title;
-
-
-                    cell.appendChild(
-                        eventElement
-                    );
-
-                }
-            );
+            /* Specific-time events are no longer
+               boxed into a single hour cell here —
+               see renderTimedOverlays(), called once
+               below after the full hour grid exists,
+               which spans each event across its real
+               start-to-end duration. */
 
 
             /* CLICK / DRAG HOUR */
@@ -2862,8 +2791,36 @@ function renderWeekCalendar(){
 
     }
 
-}
 
+    /* =====================================
+       SPANNING TIMED-EVENT OVERLAY
+       Draws each specific-time event as one
+       block sized to its real duration,
+       instead of a tiny box in its start
+       hour only.
+    ===================================== */
+
+    const weekDates = [];
+
+    for(let i = 0; i < 7; i++){
+
+        const date =
+            new Date(weekStart);
+
+        date.setDate(
+            weekStart.getDate() + i
+        );
+
+        weekDates.push(date);
+
+    }
+
+    renderTimedOverlays(
+        weekCalendar,
+        weekDates
+    );
+
+}
 /* =========================================
    RENDER DAILY VIEW
 ========================================= */
@@ -3126,87 +3083,12 @@ function renderDayCalendar(){
             hour;
 
 
-        dayEvents.forEach(
-            function(event){
-
-                if(
-                    event.timeType !== "specific" ||
-                    !event.start
-                ){
-
-                    return;
-
-                }
-
-
-                const eventHour =
-                    Number(
-                        event.start
-                            .split(":")[0]
-                    );
-
-
-                if(eventHour !== hour){
-
-                    return;
-
-                }
-
-
-                const eventElement =
-                    document.createElement("div");
-
-                eventElement.className =
-                    "week-event priority-" +
-                    (event.priority || "none");
-
-
-                if(
-                    event.status ===
-                    "completed"
-                ){
-
-                    eventElement.classList.add(
-                        "completed"
-                    );
-
-                }
-
-
-                if(
-                    event.status ===
-                    "cancelled"
-                ){
-
-                    eventElement.classList.add(
-                        "cancelled"
-                    );
-
-                }
-
-
-                let label =
-                    event.start;
-
-                if(event.end){
-
-                    label +=
-                        " – " +
-                        event.end;
-
-                }
-
-                eventElement.textContent =
-                    label +
-                    " " +
-                    event.title;
-
-                cell.appendChild(
-                    eventElement
-                );
-
-            }
-        );
+        /* Specific-time events are no longer
+           boxed into a single hour cell here —
+           see renderTimedOverlays(), called once
+           below after the full hour grid exists,
+           which spans each event across its real
+           start-to-end duration. */
 
 
         cell.addEventListener(
@@ -3228,6 +3110,275 @@ function renderDayCalendar(){
         );
 
     }
+
+
+    /* =====================================
+       SPANNING TIMED-EVENT OVERLAY
+       Draws each specific-time event as one
+       block sized to its real duration,
+       instead of a tiny box in its start
+       hour only.
+    ===================================== */
+
+    renderTimedOverlays(
+        dayCalendar,
+        [selectedDate]
+    );
+
+}
+
+function renderTimedOverlays(containerEl, days){
+
+    const hourZeroCell =
+        containerEl.querySelector(
+            '.week-cell[data-hour="0"]'
+        );
+
+    if(!hourZeroCell){
+
+        return;
+
+    }
+
+    const baseTop =
+        hourZeroCell.offsetTop;
+
+    const rowHeight =
+        hourZeroCell.offsetHeight;
+
+
+    days.forEach(function(date){
+
+        const dateKey =
+            getDateKey(date);
+
+        const referenceCell =
+            containerEl.querySelector(
+                '.week-cell[data-date="' +
+                dateKey +
+                '"][data-hour="0"]'
+            );
+
+        if(!referenceCell){
+
+            return;
+
+        }
+
+        const dayLeft =
+            referenceCell.offsetLeft;
+
+        const dayWidth =
+            referenceCell.offsetWidth;
+
+
+        const dayEvents =
+            getEventsForDate(dateKey)
+            .filter(function(event){
+
+                return (
+                    event.timeType === "specific" &&
+                    event.start
+                );
+
+            });
+
+
+        const timedEvents =
+            dayEvents.map(function(event){
+
+                const startParts =
+                    event.start.split(":");
+
+                const startMinutes =
+                    Number(startParts[0]) * 60 +
+                    Number(startParts[1]);
+
+                let endMinutes =
+                    startMinutes + 60;
+
+                if(
+                    event.end &&
+                    event.end > event.start
+                ){
+
+                    const endParts =
+                        event.end.split(":");
+
+                    endMinutes =
+                        Number(endParts[0]) * 60 +
+                        Number(endParts[1]);
+
+                }
+
+                return {
+
+                    event:
+                        event,
+
+                    startMinutes:
+                        startMinutes,
+
+                    endMinutes:
+                        endMinutes
+
+                };
+
+            });
+
+
+        timedEvents.sort(function(a,b){
+
+            return a.startMinutes - b.startMinutes;
+
+        });
+
+
+        const columns = [];
+
+        timedEvents.forEach(function(item){
+
+            let placed = false;
+
+            for(
+                let i = 0;
+                i < columns.length;
+                i++
+            ){
+
+                if(columns[i] <= item.startMinutes){
+
+                    columns[i] =
+                        item.endMinutes;
+
+                    item.column = i;
+
+                    placed = true;
+
+                    break;
+
+                }
+
+            }
+
+            if(!placed){
+
+                columns.push(
+                    item.endMinutes
+                );
+
+                item.column =
+                    columns.length - 1;
+
+            }
+
+        });
+
+        const totalColumns =
+            columns.length || 1;
+
+
+        timedEvents.forEach(function(item){
+
+            const event =
+                item.event;
+
+            const top =
+                baseTop +
+                (item.startMinutes / 60) *
+                rowHeight;
+
+            const height =
+                Math.max(
+                    (
+                        (item.endMinutes - item.startMinutes) /
+                        60
+                    ) * rowHeight,
+                    18
+                );
+
+            const columnWidth =
+                dayWidth / totalColumns;
+
+            const left =
+                dayLeft +
+                (item.column * columnWidth);
+
+            const block =
+                document.createElement("div");
+
+            block.className =
+                "week-event priority-" +
+                (event.priority || "none");
+
+
+            if(event.status === "completed"){
+
+                block.classList.add(
+                    "completed"
+                );
+
+            }
+
+
+            if(event.status === "cancelled"){
+
+                block.classList.add(
+                    "cancelled"
+                );
+
+            }
+
+
+            block.style.position =
+                "absolute";
+
+            block.style.top =
+                top + "px";
+
+            block.style.left =
+                left + "px";
+
+            block.style.width =
+                Math.max(columnWidth - 2, 20) + "px";
+
+            block.style.height =
+                height + "px";
+
+            block.style.margin =
+                "0";
+
+            block.style.zIndex =
+                "2";
+
+            block.style.overflow =
+                "hidden";
+
+
+            let label =
+                event.start;
+
+            if(event.end){
+
+                label +=
+                    " – " +
+                    event.end;
+
+            }
+
+            block.textContent =
+                label +
+                " " +
+                event.title;
+
+
+            containerEl.appendChild(
+                block
+            );
+
+        });
+
+    });
 
 }
 
