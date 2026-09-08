@@ -4124,13 +4124,13 @@ function getEventsForDate(date){
 
         /* =========================
            DAILY
+           NOTE: repeating events use event.starDate as the first occurence and repeat forever - event.endDate is only a UI default (same day as start) and is NOT a recurrencce end bound. Only the "custom" repeat type has a real end control (customRepear.endType).
         ========================= */
 
         if(event.repeat === "daily"){
 
     return (
-        current >= start &&
-        current <= end
+        current >= start
     );
 
 }
@@ -4148,7 +4148,6 @@ function getEventsForDate(date){
 
     return (
         current >= start &&
-        current <= end &&
         difference % 7 === 0
     );
 
@@ -4160,7 +4159,7 @@ function getEventsForDate(date){
 
         if(event.repeat === "monthly"){
 
-    if(current < start || current > end){
+    if(current < start){
         return false;
     }
 
@@ -4189,7 +4188,6 @@ if(event.repeat === "yearly"){
 
     return (
         current >= start &&
-        current <= end &&
         current.getMonth() === start.getMonth() &&
         current.getDate() === start.getDate()
     );
